@@ -1,17 +1,14 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:typed_data';
+import 'package:candle_dash/utils.dart';
 import 'package:candle_dash/vehicle/vehicle.dart';
 import 'package:flutter/material.dart';
-
-// ignore: depend_on_referenced_packages, unused_import
 import 'package:collection/collection.dart';
-
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:provider/provider.dart';
 
 enum StandardMetric {
-  active(0x8B51),
+  awake(0x8B51),
   gear(0x2C96),
   speed(0x75AE),
   fanSpeed(0x3419),
@@ -42,20 +39,23 @@ enum MetricType {
 }
 
 enum Unit {
-  none,
-  percent,
-  meters,
-  kilometers,
-  kilometersPerHour,
-  volts,
-  amps,
-  watts,
-  kilowatts,
-  kilowattHours,
-  celsius,
-  seconds,
-  minutes,
-  hours,
+  none(null),
+  percent('%'),
+  meters(' m'),
+  kilometers(' km'),
+  kilometersPerHour(' kph'),
+  volts(' V'),
+  amps(' A'),
+  watts(' W'),
+  kilowatts(' kW'),
+  kilowattHours(' kWh'),
+  celsius('°C'),
+  seconds(' sec'),
+  minutes(' min'),
+  hours(' hour');
+
+  const Unit(this.suffix);
+  final String? suffix;
 }
 
 abstract class Metric with ChangeNotifier {
@@ -65,16 +65,21 @@ abstract class Metric with ChangeNotifier {
     this.characteristic,
   }) {
     _characteristicSubscription = characteristic?.onValueReceived.listen(_onCharacteristicValueReceived);
+    if (characteristic?.lastValue != null) _onCharacteristicValueReceived(characteristic!.lastValue);
   }
 
   final int id;
   final Unit unit;
   final BluetoothCharacteristic? characteristic;
+  String get displayValue;
+
   late final StreamSubscription<List<int>>? _characteristicSubscription;
   bool _listeningToCharacteristic = false;
 
   static Future<Metric?> fromCharacteristic(BluetoothCharacteristic characteristic) async {
     if (!characteristic.device.isConnected) return null;
+
+    await characteristic.read();
 
     final descriptor = characteristic.descriptors.firstWhere((d) => d.uuid == Guid('0000'));
     late List<int> descriptorData;
@@ -128,12 +133,6 @@ abstract class Metric with ChangeNotifier {
     await characteristic?.setNotifyValue(true);
   }
 
-  int? _rawValueToInt(List<int> rawValue) {
-    if (rawValue.isEmpty) return null;
-    final intList = Int8List.fromList(rawValue);
-    return intList.buffer.asByteData().getInt32(0, Endian.little);
-  }
-
   void _onCharacteristicValueReceived(List<int> rawValue);
 }
 
@@ -142,33 +141,16 @@ class MetricInt extends Metric {
     required super.id,
     required super.unit,
     super.characteristic,
-  }) {
-    //_onCharacteristicValueReceived(characteristic?.lastValue)
-  }
+  });
   
   int? value;
 
-  // static int? watch<T>(BuildContext context, int metricId) {
-  //   return context.select((Vehicle? v) => (v?.metrics[metricId] as MetricInt?)?.value);
-  // }
-
-  // static MetricInt? watch(BuildContext context, int metricId) {
-  //   final vehicle = context.read<Vehicle?>();
-  //   final metric = vehicle?.metrics[metricId] as MetricInt?;
-
-  //   // Watch the value so that the widget rebuilds automatically.
-  //   context.select((Vehicle? v) => (v?.metrics[metricId] as MetricInt?)?.value);
-  //   return metric;
-  // }
-
-  // void watchValue(BuildContext context) {
-  //   context.select((Vehicle? v) => (v?.metrics[id] as MetricInt?)?.value);
-  //   _listenToCharacteristic();
-  // }
+  @override
+  String get displayValue => value?.toString() ?? '?';
 
   @override
   void _onCharacteristicValueReceived(List<int> rawValue) {
-    _setValue(_rawValueToInt(rawValue));
+    _setValue(intListToInt32(rawValue));
   }
 
   void _setValue(int? newValue) {
@@ -189,18 +171,12 @@ class MetricFloat extends Metric {
   double? value; 
   int precision;
 
-  // static MetricFloat? watch(BuildContext context, int metricId) {
-  //   final vehicle = context.read<Vehicle?>();
-  //   final metric = vehicle?.metrics[metricId] as MetricFloat?;
-
-  //   // Watch the value so that the widget rebuilds automatically.
-  //   context.select((Vehicle? v) => (v?.metrics[metricId] as MetricFloat?)?.value);
-  //   return metric;
-  // }
+  @override
+  String get displayValue => value?.round().toString() ?? '?';
  
   @override
   void _onCharacteristicValueReceived(List<int> rawValue) {
-    final intValue = _rawValueToInt(rawValue);
+    final intValue = intListToInt32(rawValue);
     if (intValue == null) return _setValue(null);
 
     _setValue(intValue / pow(10, precision));

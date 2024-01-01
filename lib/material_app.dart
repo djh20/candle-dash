@@ -1,4 +1,5 @@
 import 'package:candle_dash/settings/app_settings.dart';
+import 'package:candle_dash/theme.dart';
 import 'package:candle_dash/widgets/bluetooth/bluetooth_screen.dart';
 import 'package:candle_dash/widgets/dash/dash_screen.dart';
 import 'package:candle_dash/widgets/home/home_screen.dart';
@@ -8,7 +9,7 @@ import 'package:provider/provider.dart';
 class MyMaterialApp extends StatelessWidget {
   const MyMaterialApp({
     super.key,
-    required this.suggestedThemeMode
+    required this.suggestedThemeMode,
   });
 
   final ThemeMode suggestedThemeMode;
@@ -25,17 +26,7 @@ class MyMaterialApp extends StatelessWidget {
       themeMode = ThemeMode.dark;
     }
 
-    late ColorScheme colorScheme;
-
-    if (themeMode == ThemeMode.light) {
-      colorScheme = ColorScheme.fromSeed(seedColor: Colors.blue);
-
-    } else if (themeMode == ThemeMode.dark) {
-      colorScheme = const ColorScheme.dark(
-        primary: Color.fromRGBO(221, 221, 221, 1),
-        secondary: Color.fromRGBO(184, 184, 184, 1),
-      );
-    }
+    final ColorScheme colorScheme = (themeMode == ThemeMode.light ? lightColorScheme : darkColorScheme);
 
     return MaterialApp(
       title: 'Candle Dash',

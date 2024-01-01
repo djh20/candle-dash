@@ -1,5 +1,5 @@
 import 'package:candle_dash/vehicle/metric.dart';
-import 'package:candle_dash/widgets/dash/speedometer.dart';
+import 'package:candle_dash/widgets/dash/views/dash_view_driving.dart';
 import 'package:candle_dash/widgets/helpers/wakelock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -38,16 +38,14 @@ class _DashScreenState extends State<DashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final vehicleActive = Metric.watch<MetricInt>(context, StandardMetric.active.id)?.value == 1;
+    final vehicleAwake = Metric.watch<MetricInt>(context, StandardMetric.awake.id)?.value == 1;
 
     return GestureDetector(
       child: Scaffold(
         body: Stack(
           children: [
-            const Center(
-              child: Speedometer(),
-            ),
-            if (vehicleActive) const Wakelock(),
+            const DashViewDriving(),
+            if (vehicleAwake) const Wakelock(),
           ],
         ),
       ),
