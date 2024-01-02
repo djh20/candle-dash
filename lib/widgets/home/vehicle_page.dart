@@ -14,7 +14,6 @@ class VehiclePage extends StatelessWidget {
     final isConnected = connectionState == BluetoothConnectionState.connected;
     final isConnecting = context.select((BluetoothManager bm) => bm.isConnecting);
     final isBonded = context.select((BluetoothManager bm) => bm.isBonded);
-
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -23,8 +22,10 @@ class VehiclePage extends StatelessWidget {
             isConnected ? 'Connected!' : isConnecting ? 'Connecting...' : 'Not Connected',
             style: Theme.of(context).textTheme.bodyLarge,
           ),
-          if (!isConnected && !isConnecting && !isBonded) ...[
-            const SizedBox(height: 10),
+
+          const SizedBox(height: 5),
+
+          if (!isConnected && !isConnecting && !isBonded) 
             FilledButton.tonalIcon(
               icon: const Icon(Icons.bluetooth_searching), 
               label: const Text('Scan for Devices'),
@@ -33,15 +34,14 @@ class VehiclePage extends StatelessWidget {
                 bluetoothManager.startScan();
               },
             ),
-          ],
-          if (isBonded) ...[
-            const SizedBox(height: 10),
+
+          if (isBonded) 
             FilledButton.tonalIcon(
               icon: const Icon(Icons.bluetooth_disabled), 
               label: const Text('Unbond'),
               onPressed: () => bluetoothManager.disconnect(unbond: true),
             ),
-          ],
+            
           FilledButton.tonalIcon(
             icon: const Icon(Icons.dashboard), 
             label: const Text('Launch Dash'),

@@ -1,14 +1,15 @@
-import 'package:candle_dash/widgets/dash/dash_column.dart';
 import 'package:candle_dash/widgets/dash/dash_sidebar.dart';
 import 'package:flutter/material.dart';
 
 class DashView extends StatelessWidget {
   const DashView({
     super.key,
-    this.columns = const [],
+    this.children = const [],
+    this.showSidebar = true,
   });
 
-  final List<DashColumn> columns;
+  final bool showSidebar;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
@@ -17,15 +18,18 @@ class DashView extends StatelessWidget {
       height: MediaQuery.of(context).size.height,
       child: Row(
         children: [
-          const DashSidebar(),
+          if (showSidebar) ...const [
+            DashSidebar(),
+            // CustomVerticalDivider(),
+          ],
           Flexible(
             flex: 10,
             child: Row(
-              children: columns,
+              children: children,
             ),
           ),
         ],
-      )
+      ),
     );
   }
 }

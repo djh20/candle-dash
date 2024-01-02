@@ -46,7 +46,7 @@ class PowerBarSegment extends StatelessWidget {
     Key? key,
     required this.alignment,
     required this.widthFactor,
-    required this.color
+    required this.color,
   }) : super(key: key);
 
   @override
@@ -54,7 +54,7 @@ class PowerBarSegment extends StatelessWidget {
     return Expanded(
       child: Container(
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withOpacity(0.2),
         ),
         clipBehavior: Clip.antiAlias,
         child: AnimatedFractionallySizedBox(

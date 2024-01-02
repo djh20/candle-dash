@@ -14,6 +14,7 @@ enum StandardMetric {
   fanSpeed(0x3419),
   range(0xC3E8),
   turnSignal(0x13CA),
+  headlights(0xF20B),
   parkBrake(0x8BFE),
   ambientTemperature(0x2842),
   soc(0x3DEE),
@@ -24,10 +25,11 @@ enum StandardMetric {
   hvBattCapacity(0x5F5F),
   hvBattTemperature(0x87C9),
   chargeStatus(0x2DA6),
-  remainChargeTime(0x31D1),
+  remainingChargeTime(0x31D1),
   rangeLastCharge(0x5E38),
   quickCharges(0x90FB),
-  slowCharges(0x18AB);
+  slowCharges(0x18AB),
+  tripDistance(0x912F);
 
   const StandardMetric(this.id);
   final int id;
@@ -39,7 +41,7 @@ enum MetricType {
 }
 
 enum Unit {
-  none(null),
+  none(''),
   percent('%'),
   meters(' m'),
   kilometers(' km'),
@@ -55,7 +57,7 @@ enum Unit {
   hours(' hour');
 
   const Unit(this.suffix);
-  final String? suffix;
+  final String suffix;
 }
 
 abstract class Metric with ChangeNotifier {
@@ -71,7 +73,7 @@ abstract class Metric with ChangeNotifier {
   final int id;
   final Unit unit;
   final BluetoothCharacteristic? characteristic;
-  String get displayValue;
+  String? get displayValue;
 
   late final StreamSubscription<List<int>>? _characteristicSubscription;
   bool _listeningToCharacteristic = false;
@@ -146,17 +148,21 @@ class MetricInt extends Metric {
   int? value;
 
   @override
-  String get displayValue => value?.toString() ?? '?';
+  String? get displayValue => value?.toString();
 
-  @override
-  void _onCharacteristicValueReceived(List<int> rawValue) {
-    _setValue(intListToInt32(rawValue));
-  }
-
-  void _setValue(int? newValue) {
+  Future<void> setValue(int? newValue, {bool publish = false}) async {
     if (value == newValue) return;
     value = newValue;
     notifyListeners();
+    
+    if (publish) {
+      await characteristic?.write(int32ToIntList(value));
+    }
+  }
+
+  @override
+  void _onCharacteristicValueReceived(List<int> rawValue) {
+    setValue(intListToInt32(rawValue));
   }
 }
 
@@ -172,19 +178,27 @@ class MetricFloat extends Metric {
   int precision;
 
   @override
-  String get displayValue => value?.round().toString() ?? '?';
+  String? get displayValue => value?.toStringAsFixed(1);
+
+  Future<void> setValue(double? newValue, {bool publish = false}) async {
+    if (value == newValue) return;
+    value = newValue;
+    notifyListeners();
+
+    if (publish) {
+      int? convertedValue;
+
+      if (value != null) {
+        convertedValue = (value! * pow(10, precision)).toInt();
+      }
+    
+      characteristic?.write(int32ToIntList(convertedValue));
+    }
+  }
  
   @override
   void _onCharacteristicValueReceived(List<int> rawValue) {
     final intValue = intListToInt32(rawValue);
-    if (intValue == null) return _setValue(null);
-
-    _setValue(intValue / pow(10, precision));
-  }
-
-  void _setValue(double? newValue) {
-    if (value == newValue) return;
-    value = newValue;
-    notifyListeners();
+    (intValue != null) ? setValue(intValue / pow(10, precision)) : setValue(null);
   }
 }

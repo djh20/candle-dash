@@ -15,19 +15,19 @@ class GearIndicatorDashItem extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: VehicleGear.values.map(
           (g) => Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 8),
             child: AnimatedOpacity(
               opacity: (gearIndex == g.index) ? 1 : 0.3,
               duration: const Duration(milliseconds: 100),
               child: Text(
                 g.symbol,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 24,
-                  fontWeight: FontWeight.bold
-                )
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          )
+          ),
         ).toList(),
       ),
     );

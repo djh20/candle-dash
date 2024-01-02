@@ -48,7 +48,7 @@ class OptionButton extends StatelessWidget {
     super.key,
     required this.label,
     required this.selected,
-    this.onPressed
+    this.onPressed,
   });
   
   final Widget label;

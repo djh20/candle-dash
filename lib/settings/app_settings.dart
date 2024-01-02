@@ -33,8 +33,9 @@ class AppSettings with ChangeNotifier {
     _prefs.setInt('theme', _theme!.index);
   }
 
-  void _update(VoidCallback callback) {
+  Future<void> _update(VoidCallback callback) async {
     callback();
     notifyListeners();
+    await save();
   }
 }

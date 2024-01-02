@@ -1,5 +1,8 @@
 import 'package:candle_dash/vehicle/metric.dart';
-import 'package:candle_dash/widgets/dash/views/dash_view_driving.dart';
+import 'package:candle_dash/widgets/dash/views/asleep_dash_view.dart';
+import 'package:candle_dash/widgets/dash/views/charging_dash_view.dart';
+import 'package:candle_dash/widgets/dash/views/driving_dash_view.dart';
+import 'package:candle_dash/widgets/helpers/custom_animated_switcher.dart';
 import 'package:candle_dash/widgets/helpers/wakelock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,12 +42,18 @@ class _DashScreenState extends State<DashScreen> {
   @override
   Widget build(BuildContext context) {
     final vehicleAwake = Metric.watch<MetricInt>(context, StandardMetric.awake.id)?.value == 1;
+    final charging = Metric.watch<MetricInt>(context, StandardMetric.chargeStatus.id);
+    final bool pluggedIn = (charging?.value != null && charging!.value! > 0);
 
     return GestureDetector(
       child: Scaffold(
         body: Stack(
           children: [
-            const DashViewDriving(),
+            CustomAnimatedSwitcher(
+              child: vehicleAwake ? 
+                (!pluggedIn ? const DrivingDashView() : const ChargingDashView()) :
+                const AsleepDashView(),
+            ),
             if (vehicleAwake) const Wakelock(),
           ],
         ),

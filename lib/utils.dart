@@ -31,3 +31,10 @@ int? intListToInt16(List<int> list, {Endian endian = Endian.little}) {
   final intList = Int8List.fromList(list);
   return intList.buffer.asByteData().getInt16(0, endian);
 }
+
+List<int> int32ToIntList(int? int32) {
+  if (int32 == null) return const [];
+  ByteData byteData = ByteData(4);
+  byteData.setInt32(0, int32, Endian.little);
+  return byteData.buffer.asUint8List().toList();
+}
