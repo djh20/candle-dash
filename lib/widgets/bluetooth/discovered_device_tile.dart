@@ -14,7 +14,6 @@ class ScanResultTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final device = result.device;
-    //final adv = result.advertisementData;
 
     return Card(
       child: ListTile(

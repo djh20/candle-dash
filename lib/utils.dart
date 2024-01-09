@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
+
 num calculateMedian(List<num> values) {
   // Clone list
   final List<num> clonedList = [];
@@ -37,4 +39,17 @@ List<int> int32ToIntList(int? int32) {
   ByteData byteData = ByteData(4);
   byteData.setInt32(0, int32, Endian.little);
   return byteData.buffer.asUint8List().toList();
+}
+
+Color lerpColor(double progress, {
+  required Color from,
+  required Color to,
+}) {
+  final HSVColor hsvColor = HSVColor.lerp(
+    HSVColor.fromColor(from), 
+    HSVColor.fromColor(to), 
+    progress,
+  ) ?? HSVColor.fromColor(from);
+
+  return hsvColor.toColor();
 }

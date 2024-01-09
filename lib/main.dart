@@ -1,9 +1,11 @@
 import 'dart:async';
 
-import 'package:candle_dash/connection/bluetooth_manager.dart';
+import 'package:candle_dash/managers/bluetooth_manager.dart';
+import 'package:candle_dash/managers/dash_manager.dart';
 import 'package:candle_dash/material_app.dart';
 import 'package:candle_dash/settings/app_settings.dart';
 import 'package:candle_dash/utils.dart';
+import 'package:flutter/services.dart';
 import 'package:light_sensor/light_sensor.dart';
 import 'package:candle_dash/vehicle/vehicle.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +30,7 @@ class _MyAppState extends State<MyApp> {
 
   final appSettings = AppSettings();
   final bluetoothManager = BluetoothManager();
+  final dashManager = DashManager();
   Vehicle? vehicle;
 
   late StreamSubscription<BluetoothConnectionState?> connectionStateStreamSubscription;
@@ -43,10 +46,14 @@ class _MyAppState extends State<MyApp> {
     bluetoothManager.init();
     appSettings.init();
 
-    connectionStateStreamSubscription = bluetoothManager.globalConnectionStateStream.listen((state) {
+    connectionStateStreamSubscription = bluetoothManager.globalConnectionStateStream.listen((state) async {
       if (state == BluetoothConnectionState.connected && bluetoothManager.currentDevice != null) {
         setState(() => vehicle = Vehicle());
-        vehicle!.init(bluetoothManager.currentDevice!);
+        try {
+          await vehicle!.init(bluetoothManager.currentDevice!).onError((error, stackTrace) => null);
+        } on PlatformException {
+          debugPrint('Vehicle init failed!');
+        }
 
       } else if (state == BluetoothConnectionState.disconnected) {
         vehicle?.dispose();
@@ -111,6 +118,7 @@ class _MyAppState extends State<MyApp> {
       providers: [
         ChangeNotifierProvider.value(value: appSettings),
         ChangeNotifierProvider.value(value: bluetoothManager),
+        ChangeNotifierProvider.value(value: dashManager),
         ChangeNotifierProvider.value(value: vehicle),
       ],
       child: MyMaterialApp(

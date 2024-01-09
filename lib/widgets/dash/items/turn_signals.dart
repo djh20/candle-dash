@@ -68,13 +68,11 @@ class _TurnSignalsDashItemState extends State<TurnSignalsDashItem> with TickerPr
 class TurnSignalIcon extends StatelessWidget {
   const TurnSignalIcon({
     super.key,
-    //required this.controller,
     required this.animation,
     required this.icon,
     this.visible = true,
   });
 
-  //final AnimationController controller;
   final Animation<Offset> animation;
   final IconData icon;
   final bool visible;
@@ -84,8 +82,7 @@ class TurnSignalIcon extends StatelessWidget {
     return AnimatedOpacity(
       opacity: visible ? 1 : 0,
       duration: const Duration(milliseconds: 200),
-      child: SlideTransition(//FadeTransition(
-        //opacity: controller,
+      child: SlideTransition(
         position: animation,
         child: Icon(
           icon,

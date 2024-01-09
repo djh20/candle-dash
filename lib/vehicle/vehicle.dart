@@ -33,6 +33,7 @@ class Vehicle with ChangeNotifier {
   // TODO: Use generic renders instead of leaf.
   static const defaultRepresentation = VehicleRepresentation(
     rendersDirectory: 'nissan_leaf_gen1',
+    brand: 'nissan',
 
     chargingRenderAspectRatio: 32 / 11,
     chargingRenderPackAlignment: Alignment(0.16, 0.6),
@@ -65,6 +66,9 @@ class Vehicle with ChangeNotifier {
       debugPrint('Discovered service: ${service.uuid.str}');
     }
 
+    // Ensure bluetooth has initalized.
+    await Future.delayed(const Duration(milliseconds: 100));
+
     final metricsService = services.firstWhere((m) => m.uuid == Guid.fromString(Constants.metricsServiceId));
     final configService = services.firstWhere((m) => m.uuid == Guid.fromString(Constants.configServiceId));
 
@@ -75,13 +79,22 @@ class Vehicle with ChangeNotifier {
 
     for (final characteristic in metricsService.characteristics) {
       final metric = await Metric.fromCharacteristic(characteristic);
-      if (metric != null && !_disposed) {
-        debugPrint('Registered metric: ${characteristic.uuid.str}');
-        metrics = [...metrics, metric];
-        
-        metric.addListener(() => notifyListeners()); 
-        notifyListeners();
-      }
+      if (metric != null && !_disposed) registerMetric(metric);
+    }
+
+    /// TODO: Ensure that no value updates are missed.
+    /// At the moment, characteristics are read first and then listened to.
+    /// If a value updates on the bluetooth device between these operations, it will be missed.
+    /// The operations must be performed in this order, otherwise the read operation often fails
+    /// for some reason.
+    for (final metric in metrics) {
+      if (_disposed) return;
+      await metric.readCharacteristic();
+    }
+
+    for (final metric in metrics) {
+      if (_disposed) return;
+      await metric.listenToCharacteristic();
     }
 
     if (!_disposed) await _initGps();
@@ -94,6 +107,16 @@ class Vehicle with ChangeNotifier {
     _disposeMetrics();
     super.dispose();
   }
+
+  void registerMetric(Metric newMetric) {
+    metrics = [...metrics, newMetric];
+    notifyListeners();
+    newMetric.addListener(() => notifyListeners()); 
+
+    debugPrint('Registered metric: ${newMetric.id}');
+  }
+
+  void registerMetrics(List<Metric> newMetrics) => newMetrics.forEach(registerMetric);
 
   Future<void> _initGps() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -163,8 +186,9 @@ class Vehicle with ChangeNotifier {
 
 class VehicleRepresentation {
   const VehicleRepresentation({
-    this.vehicleId, 
+    this.vehicleId,
     required this.rendersDirectory,
+    required this.brand,
     this.chargingRenderAspectRatio,
     this.chargingRenderPackAlignment,
     this.chargingRenderPackHeightFactor,
@@ -173,6 +197,7 @@ class VehicleRepresentation {
 
   final int? vehicleId;
   final String rendersDirectory;
+  final String brand;
   
   final double? chargingRenderAspectRatio;
   final Alignment? chargingRenderPackAlignment;

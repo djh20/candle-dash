@@ -1,5 +1,6 @@
 import 'package:candle_dash/vehicle/metric.dart';
 import 'package:candle_dash/widgets/dash/dash_item.dart';
+import 'package:candle_dash/widgets/dash/items/incompatible.dart';
 import 'package:candle_dash/widgets/dash/metric_label.dart';
 import 'package:candle_dash/widgets/dash/property_label.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +13,7 @@ class TripInfoDashItem extends StatelessWidget {
     final tripDistance = Metric.watch<MetricFloat>(context, StandardMetric.tripDistance.id);
 
     if (tripDistance == null) {
-      return Container();
+      return IncompatibleDashItem(this);
     }
 
     final range = Metric.watch<MetricInt>(context, StandardMetric.range.id);
@@ -47,30 +48,5 @@ class TripInfoDashItem extends StatelessWidget {
         ],
       ),
     );
-
-    // return DashItem(
-    //   child: Row(
-    //     mainAxisAlignment: MainAxisAlignment.center,
-    //     children: [
-    //       MetricLabel(
-    //         tripDistance,
-    //         title: 'Travelled',
-    //         defaultValue: '0',
-    //       ),
-    //       const SizedBox(width: 20),
-    //       Container(
-    //         padding: const EdgeInsets.symmetric(horizontal: 10),
-    //         decoration: BoxDecoration(
-    //           color: (rangeVariation >= 0) ? Colors.green : Colors.red,
-    //         ),
-    //         child: PropertyLabel(
-    //           value: rangeVariationText,
-    //           unit: Unit.kilometers,
-    //           color: Colors.white
-    //         )
-    //       )
-    //     ],
-    //   ),
-    // );
   }
 }

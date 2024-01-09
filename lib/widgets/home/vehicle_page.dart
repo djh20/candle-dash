@@ -1,4 +1,4 @@
-import 'package:candle_dash/connection/bluetooth_manager.dart';
+import 'package:candle_dash/managers/bluetooth_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:provider/provider.dart';
@@ -28,7 +28,7 @@ class VehiclePage extends StatelessWidget {
           if (!isConnected && !isConnecting && !isBonded) 
             FilledButton.tonalIcon(
               icon: const Icon(Icons.bluetooth_searching), 
-              label: const Text('Scan for Devices'),
+              label: const Text('Bond to Device'),
               onPressed: () {
                 Navigator.pushNamed(context, '/bluetooth');
                 bluetoothManager.startScan();
@@ -38,7 +38,7 @@ class VehiclePage extends StatelessWidget {
           if (isBonded) 
             FilledButton.tonalIcon(
               icon: const Icon(Icons.bluetooth_disabled), 
-              label: const Text('Unbond'),
+              label: const Text('Unbond from Device'),
               onPressed: () => bluetoothManager.disconnect(unbond: true),
             ),
             

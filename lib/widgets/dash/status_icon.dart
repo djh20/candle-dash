@@ -22,18 +22,10 @@ class StatusIcon extends StatelessWidget {
       duration: const Duration(milliseconds: 250),
       curve: Curves.fastOutSlowIn,
       opacity: visible ? 1 : 0,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: size+2),
-        child: AnimatedFractionallySizedBox(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.fastOutSlowIn,
-          heightFactor: visible ? 1 : 0,
-          child: Icon(
-            icon,
-            size: size,
-            color: color,
-          ),
-        ),
+      child: Icon(
+        icon,
+        size: size,
+        color: color,
       ),
     );
   }

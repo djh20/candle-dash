@@ -1,3 +1,4 @@
+import 'package:candle_dash/utils.dart';
 import 'package:flutter/material.dart';
 
 class LimitsIndicator extends StatelessWidget {
@@ -8,6 +9,9 @@ class LimitsIndicator extends StatelessWidget {
     required this.value,
     required this.min,
     required this.max,
+    required this.minColor,
+    required this.midColor,
+    required this.maxColor,
   });
 
   final Widget title;
@@ -16,12 +20,23 @@ class LimitsIndicator extends StatelessWidget {
   final double value;
   final double min;
   final double max;
+  final Color minColor;
+  final Color midColor;
+  final Color maxColor;
 
   @override
   Widget build(BuildContext context) {
     final double range = max - min;
     final double pos = value - min;
     final double progress = pos/range;
+
+    late final Color color;
+
+    if (progress >= 0.5) {
+      color = lerpColor((progress-0.5)*2, from: midColor, to: maxColor);
+    } else {
+      color = lerpColor(progress*2, from: minColor, to: midColor);
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,6 +49,7 @@ class LimitsIndicator extends StatelessWidget {
         LinearProgressIndicator(
           value: progress,
           backgroundColor: Theme.of(context).colorScheme.onBackground.withOpacity(0.2),
+          color: color,
         ),
       ],
     );

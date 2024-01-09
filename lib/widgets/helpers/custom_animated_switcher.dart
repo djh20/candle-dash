@@ -11,7 +11,7 @@ class CustomAnimatedSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 500),
       reverseDuration: const Duration(milliseconds: 200),
       switchInCurve: Curves.fastOutSlowIn,
       switchOutCurve: Curves.fastOutSlowIn,

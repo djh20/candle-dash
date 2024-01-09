@@ -29,7 +29,12 @@ enum StandardMetric {
   rangeLastCharge(0x5E38),
   quickCharges(0x90FB),
   slowCharges(0x18AB),
-  tripDistance(0x912F);
+  tripDistance(0x912F),
+  steeringAngle(0x35F8),
+  flTirePressure(0x858D),
+  frTirePressure(0x5193),
+  rlTirePressure(0xFA16),
+  rrTirePressure(0x842D);
 
   const StandardMetric(this.id);
   final int id;
@@ -54,7 +59,8 @@ enum Unit {
   celsius('°C'),
   seconds(' sec'),
   minutes(' min'),
-  hours(' hour');
+  hours(' hour'),
+  psi(' PSI');
 
   const Unit(this.suffix);
   final String suffix;
@@ -63,11 +69,10 @@ enum Unit {
 abstract class Metric with ChangeNotifier {
   Metric({
     required this.id,
-    required this.unit,
+    this.unit = Unit.none,
     this.characteristic,
   }) {
     _characteristicSubscription = characteristic?.onValueReceived.listen(_onCharacteristicValueReceived);
-    if (characteristic?.lastValue != null) _onCharacteristicValueReceived(characteristic!.lastValue);
   }
 
   final int id;
@@ -81,8 +86,6 @@ abstract class Metric with ChangeNotifier {
   static Future<Metric?> fromCharacteristic(BluetoothCharacteristic characteristic) async {
     if (!characteristic.device.isConnected) return null;
 
-    await characteristic.read();
-
     final descriptor = characteristic.descriptors.firstWhere((d) => d.uuid == Guid('0000'));
     late List<int> descriptorData;
 
@@ -92,6 +95,9 @@ abstract class Metric with ChangeNotifier {
       debugPrint('Failed to read descriptor: $err');
       return null;
     }
+
+    // await characteristic.read();
+    // await characteristic.setNotifyValue(true);
 
     final id = int.parse(characteristic.uuid.str, radix: 16);
 
@@ -117,7 +123,6 @@ abstract class Metric with ChangeNotifier {
 
     // Watch the value so that the widget rebuilds automatically.
     context.select((Vehicle? v) => (v?.metrics.firstWhereOrNull((m) => m.id == metricId) as dynamic)?.value);
-    metric?.listenToCharacteristic();
     
     return metric;
   }
@@ -128,11 +133,17 @@ abstract class Metric with ChangeNotifier {
     super.dispose();
   }
 
-  void listenToCharacteristic() async {
-    if (_listeningToCharacteristic) return;
+  Future<void> readCharacteristic() async {
+    debugPrint('Reading characteristic: ${characteristic!.uuid}');
+    _onCharacteristicValueReceived(await characteristic!.read(timeout: 2));
+  }
+
+  Future<void> listenToCharacteristic() async {
+    if (_listeningToCharacteristic || characteristic == null) return;
 
     _listeningToCharacteristic = true;
-    await characteristic?.setNotifyValue(true);
+    debugPrint('Listening to characteristic: ${characteristic!.uuid}');
+    await characteristic!.setNotifyValue(true, timeout: 2);
   }
 
   void _onCharacteristicValueReceived(List<int> rawValue);
@@ -141,9 +152,12 @@ abstract class Metric with ChangeNotifier {
 class MetricInt extends Metric {
   MetricInt({
     required super.id,
-    required super.unit,
+    super.unit,
     super.characteristic,
-  });
+    int? initialValue,
+  }) {
+    setValue(initialValue);
+  }
   
   int? value;
 
@@ -169,10 +183,13 @@ class MetricInt extends Metric {
 class MetricFloat extends Metric {
   MetricFloat({
     required super.id,
-    required super.unit,
+    super.unit,
     super.characteristic,
     required this.precision,
-  });
+    double? initialValue,
+  }) {
+    setValue(initialValue);
+  }
 
   double? value; 
   int precision;

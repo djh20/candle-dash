@@ -1,4 +1,4 @@
-import 'package:candle_dash/connection/bluetooth_manager.dart';
+import 'package:candle_dash/managers/bluetooth_manager.dart';
 import 'package:candle_dash/widgets/bluetooth/discovered_device_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -13,10 +13,10 @@ class BluetoothScreen extends StatelessWidget {
     final scanResults = context.select((BluetoothManager bm) => bm.scanResults);
 
     return PopScope(
-      onPopInvoked: (_) => bluetoothManager.stopScan(),
+      onPopInvoked: (didPop) => didPop ? bluetoothManager.stopScan() : null,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Connect to Device'),
+          title: const Text('Bond to Device'),
         ),
         body: ListView.builder(
           padding: const EdgeInsets.only(left: 8, right: 8, bottom: 80),

@@ -98,10 +98,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_blue_plus
-      sha256: f9d546a09009650f4d2918f50cc76d39d8e84f74314a7c87dce197253e292c3a
+      sha256: aaeaea38bc6d697092ff8c9224dc5046e38682b6257515d971bb078567e4efcb
       url: "https://pub.dev"
     source: hosted
-    version: "1.31.4"
+    version: "1.31.7"
   flutter_lints:
     dependency: "direct dev"
     description:
@@ -384,6 +384,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.2"
+  skeletonizer:
+    dependency: "direct main"
+    description:
+      name: skeletonizer
+      sha256: "07405b0ca307dd940f09720bef1e76059933fde681907ed5aca553f72b1e6d10"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   sky_engine:
     dependency: transitive
     description: flutter

@@ -1,8 +1,10 @@
 import 'package:candle_dash/theme.dart';
 import 'package:candle_dash/vehicle/metric.dart';
 import 'package:candle_dash/widgets/dash/dash_item.dart';
+import 'package:candle_dash/widgets/dash/items/incompatible.dart';
 import 'package:flutter/material.dart';
 
+// TODO: Make these configurable.
 const double inMaxPower = 30;
 const double outMaxPower = 80;
 const double deadZone = 1;
@@ -15,23 +17,30 @@ class PowerBarDashItem extends StatelessWidget {
     final Color outColor = Theme.of(context).colorScheme.onBackground;
     const Color inColor = chargeColor;
 
-    double power = Metric.watch<MetricFloat>(context, StandardMetric.hvBattPower.id)?.value ?? 0;
+    final power = Metric.watch<MetricFloat>(context, StandardMetric.hvBattPower.id);
+    final gear = Metric.watch<MetricInt>(context, StandardMetric.gear.id);
+
+    if (power == null) return IncompatibleDashItem(this);
     
-    return DashItem(
-      child: Row(
-        children: [
-          PowerBarSegment(
-            alignment: Alignment.centerRight,
-            widthFactor: (((-power - deadZone) / inMaxPower)).clamp(0, 1),
-            color: inColor,
-          ),
-          const SizedBox(width: 4),
-          PowerBarSegment(
-            alignment: Alignment.centerLeft,
-            widthFactor: (((power - deadZone) / outMaxPower)).clamp(0, 1),
-            color: outColor,
-          ),
-        ],
+    return AnimatedOpacity(
+      opacity: (gear == null || (gear.value ?? 0) > 0) ? 1 : 0,
+      duration: const Duration(milliseconds: 200),
+      child: DashItem(
+        child: Row(
+          children: [
+            PowerBarSegment(
+              alignment: Alignment.centerRight,
+              widthFactor: (((-(power.value ?? 0) - deadZone) / inMaxPower)).clamp(0, 1),
+              color: inColor,
+            ),
+            const SizedBox(width: 4),
+            PowerBarSegment(
+              alignment: Alignment.centerLeft,
+              widthFactor: ((((power.value ?? 0) - deadZone) / outMaxPower)).clamp(0, 1),
+              color: outColor,
+            ),
+          ],
+        ),
       ),
     );
   }
