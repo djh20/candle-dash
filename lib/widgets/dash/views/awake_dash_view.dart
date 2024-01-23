@@ -22,7 +22,7 @@ class AwakeDashView extends StatelessWidget {
         DashColumn(
           flex: 2,
           items: [
-            const ConnectionStatusIndicatorDashItem(),
+            const ConnectionStatusIndicatorGizmo(),
             Divider(
               indent: 10,
               endIndent: 10,
@@ -34,24 +34,24 @@ class AwakeDashView extends StatelessWidget {
         const DashColumn(
           flex: 11,
           items: [
-            PowerBarDashItem(),
+            PowerBarGizmo(),
             Stack(
               children: [
-                GearIndicatorDashItem(),
+                GearIndicatorGizmo(),
                 TurnSignalsDashItem(),
               ],
             ),
-            SpeedometerDashItem(),
-            BatteryMeterDashItem(),
+            SpeedometerGizmo(),
+            BatteryMeterGizmo(),
             TripInfoDashItem(),
           ],
         ),
         const DashColumn(
           flex: 8,
-          panel: true,
+          swipeable: true,
           items: [
-            BirdseyeDashItem(),
-            BatteryStatsDashItem(),
+            BirdseyeGizmo(),
+            BatteryStatsGizmo(),
           ],
         ),
       ],

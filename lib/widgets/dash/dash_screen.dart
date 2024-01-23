@@ -3,7 +3,6 @@ import 'package:candle_dash/vehicle/dummy_vehicle.dart';
 import 'package:candle_dash/vehicle/metric.dart';
 import 'package:candle_dash/vehicle/vehicle.dart';
 import 'package:candle_dash/widgets/dash/dash_action_dialog.dart';
-import 'package:candle_dash/widgets/dash/editing/editing_actions_sheet.dart';
 import 'package:candle_dash/widgets/dash/views/asleep_dash_view.dart';
 import 'package:candle_dash/widgets/dash/views/awake_dash_view.dart';
 import 'package:candle_dash/widgets/helpers/custom_animated_switcher.dart';
@@ -22,7 +21,7 @@ const _hintSnackBar = SnackBar(
     children: [
       SnackBarIcon(Icons.touch_app),
       SizedBox(width: 10),
-      Text('Press and hold anywhere to exit'),
+      Text('Press and hold anywhere to access menu'),
     ],
   ),
 );
@@ -79,7 +78,6 @@ class _DashScreenContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final editing = context.select((DashManager dm) => dm.editing);
     final vehicleAwake = Metric.watch<MetricInt>(context, StandardMetric.awake.id)?.value == 1;
 
     return PopScope(
@@ -94,7 +92,6 @@ class _DashScreenContent extends StatelessWidget {
               if (vehicleAwake) const Wakelock(),
             ],
           ),
-          bottomSheet: editing ? const EditingActionsSheet() : null,
         ),
         onLongPress: () => showDialog<void>(context: context, builder: (_) => const DashActionDialog()),
       ),

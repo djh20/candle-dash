@@ -1,14 +1,17 @@
 import 'package:candle_dash/managers/bluetooth_manager.dart';
-import 'package:candle_dash/widgets/dash/dash_item.dart';
+import 'package:candle_dash/widgets/dash/gizmo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:provider/provider.dart';
 
-class ConnectionStatusIndicatorDashItem extends StatelessWidget {
-  const ConnectionStatusIndicatorDashItem({super.key});
+class ConnectionStatusIndicatorGizmo extends Gizmo {
+  const ConnectionStatusIndicatorGizmo({super.key}) : super(
+    name: 'Connection Status Indicator',
+    height: 35,
+  );
 
   @override
-  Widget build(BuildContext context) {
+  Widget buildContent(BuildContext context) {
     final connectionState = context.select((BluetoothManager bm) => bm.connectionState);
     final isConnected = (connectionState == BluetoothConnectionState.connected);
     final isConnecting = context.select((BluetoothManager bm) => bm.isConnecting);
@@ -27,39 +30,37 @@ class ConnectionStatusIndicatorDashItem extends StatelessWidget {
       icon = Icons.bluetooth_searching;
     }
     
-    return DashItem(
-      child: LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) { 
-          final compact = constraints.maxWidth < 150;
+    return LayoutBuilder(
+      builder: (BuildContext context, BoxConstraints constraints) { 
+        final compact = constraints.maxWidth < 150;
 
-          return Center(
-            child: Container(
-              padding: const EdgeInsets.all(5.0),
-              decoration: BoxDecoration(
-                color: backgroundColor,
-                borderRadius: BorderRadius.circular(5.0),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: compact ? MainAxisSize.max : MainAxisSize.min,
-                children: [
-                  Icon(
-                    icon,
-                    color: Colors.white,
-                  ),
-                  if (!compact) Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Text(
-                      text,
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
+        return Center(
+          child: Container(
+            padding: const EdgeInsets.all(5.0),
+            decoration: BoxDecoration(
+              color: backgroundColor,
+              borderRadius: BorderRadius.circular(5.0),
             ),
-          );
-        },
-      ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: compact ? MainAxisSize.max : MainAxisSize.min,
+              children: [
+                Icon(
+                  icon,
+                  color: Colors.white,
+                ),
+                if (!compact) Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    text,
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

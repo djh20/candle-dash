@@ -8,9 +8,9 @@ class StatusIconsDashItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final parkBrake = Metric.watch<MetricInt>(context, StandardMetric.parkBrake.id)?.value;
-    final fanSpeed = Metric.watch<MetricInt>(context, StandardMetric.fanSpeed.id)?.value;
-    final headlights = Metric.watch<MetricInt>(context, StandardMetric.headlights.id)?.value;
+    final parkBrake = Metric.watch<MetricInt>(context, StandardMetric.parkBrake.id);
+    final fanSpeed = Metric.watch<MetricInt>(context, StandardMetric.fanSpeed.id);
+    final headlights = Metric.watch<MetricInt>(context, StandardMetric.headlights.id);
 
     return DashItem(
       child: Center(
@@ -20,19 +20,19 @@ class StatusIconsDashItem extends StatelessWidget {
           spacing: 6,
           runSpacing: 6,
           children: [
-            StatusIcon(
+            if (parkBrake != null) StatusIcon(
               icon: Icons.local_parking,
               color: Colors.red,
-              visible: parkBrake == 1,
+              active: parkBrake.value == 1,
             ),
-            StatusIcon(
+            if (headlights != null) StatusIcon(
               icon: Icons.wb_twilight,
               color: Colors.green,
-              visible: (headlights != null && headlights > 0),
+              active: (headlights.value != null && headlights.value! > 0),
             ),
-            StatusIcon(
+            if (fanSpeed != null) StatusIcon(
               icon: Icons.air_rounded,
-              visible: (fanSpeed != null && fanSpeed > 0),
+              active: (fanSpeed.value != null && fanSpeed.value! > 0),
             ),
           ],
         ),

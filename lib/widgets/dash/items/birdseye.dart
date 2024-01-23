@@ -3,22 +3,21 @@ import 'dart:ui' as ui;
 import 'package:candle_dash/vehicle/metric.dart';
 import 'package:candle_dash/vehicle/vehicle.dart';
 import 'package:candle_dash/widgets/dash/dash_item.dart';
+import 'package:candle_dash/widgets/dash/gizmo.dart';
 import 'package:candle_dash/widgets/dash/property_label.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class BirdseyeDashItem extends StatelessWidget {
-  const BirdseyeDashItem({super.key});
+class BirdseyeGizmo extends Gizmo {
+  const BirdseyeGizmo({super.key}) : super(
+    name: 'Birds-eye',
+    height: 350,
+  );
   
   @override
-  Widget build(BuildContext context) {
+  Widget buildContent(BuildContext context) {
     final vehicleRepresentation = context.select((Vehicle? v) => v?.representation);
-    
-    if (vehicleRepresentation == null) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
+    if (vehicleRepresentation == null) return spinner;
 
     final gear = Metric.watch<MetricInt>(context, StandardMetric.gear.id)?.value ?? 0;
     final flTirePressure = Metric.watch<MetricFloat>(context, StandardMetric.flTirePressure.id);
@@ -33,7 +32,6 @@ class BirdseyeDashItem extends StatelessWidget {
           if (gear == VehicleGear.drive.index) const _Trajectory(
             travelDirection: VerticalDirection.up,
           ),
-          // if (steeringAngle != null) MetricLabel(steeringAngle),
           Stack(
             alignment: Alignment.center,
             clipBehavior: Clip.none,
@@ -42,7 +40,7 @@ class BirdseyeDashItem extends StatelessWidget {
                 opacity: 0.5,
                 child: Image.asset(
                   'assets/renders/${vehicleRepresentation.rendersDirectory}/birdseye.png',
-                  height: 250,
+                  height: 230,
                 ),
               ),
               if (flTirePressure != null) _TirePressureLabel(
@@ -153,7 +151,7 @@ class _TrajectoryPainter extends CustomPainter {
     const double endY = 0;
     final double controlY = (size.height / 2) + yOffset;
 
-    final double endXOffset = steeringAngle * 80;
+    final double endXOffset = steeringAngle * 100;
 
     final paint = Paint()
     ..strokeWidth = 30

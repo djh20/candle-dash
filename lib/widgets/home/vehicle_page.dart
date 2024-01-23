@@ -14,6 +14,7 @@ class VehiclePage extends StatelessWidget {
     final isConnected = connectionState == BluetoothConnectionState.connected;
     final isConnecting = context.select((BluetoothManager bm) => bm.isConnecting);
     final isBonded = context.select((BluetoothManager bm) => bm.isBonded);
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -41,7 +42,7 @@ class VehiclePage extends StatelessWidget {
               label: const Text('Unbond from Device'),
               onPressed: () => bluetoothManager.disconnect(unbond: true),
             ),
-            
+
           FilledButton.tonalIcon(
             icon: const Icon(Icons.dashboard), 
             label: const Text('Launch Dash'),

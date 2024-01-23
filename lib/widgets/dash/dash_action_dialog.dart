@@ -15,17 +15,39 @@ class DashActionDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          IconButton.filledTonal(
+          FilledButton.icon(
+            label: const Text('Close Dash'),
+            icon: const Icon(Icons.close),
             onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst), 
-            icon: const Icon(Icons.home),
           ),
-          IconButton.filledTonal(
+          if (!editing) FilledButton.tonalIcon(
+            label: const Text('Enable Edit Mode'),
+            icon: const Icon(Icons.edit),
             onPressed: () {
               toggleEditing();
               pop(context);
             },
-            icon: Icon(editing ? Icons.edit_off : Icons.edit),
           ),
+          if (editing) ...[
+            FilledButton.tonalIcon(
+              label: const Text('Save Layout'),
+              icon: const Icon(Icons.save),
+              onPressed: () {},
+            ),
+            FilledButton.tonalIcon(
+              label: const Text('Change Layout'),
+              icon: const Icon(Icons.layers),
+              onPressed: () {},
+            ),
+            FilledButton.tonalIcon(
+              label: const Text('Disable Edit Mode'),
+              icon: const Icon(Icons.edit_off),
+              onPressed: () {
+                toggleEditing();
+                pop(context);
+              },
+            ),
+          ],
           TextButton(
             child: const Text('Dismiss'),
             onPressed: () => pop(context),
