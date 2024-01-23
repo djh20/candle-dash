@@ -96,7 +96,7 @@ class BluetoothManager with ChangeNotifier {
     notifyListeners();
 
     try {
-      await device.connect(timeout: const Duration(seconds: 5), mtu: 23);
+      await device.connect(timeout: const Duration(seconds: 5), mtu: 115);
 
     } on FlutterBluePlusException catch (err) {
       debugPrint(err.toString());

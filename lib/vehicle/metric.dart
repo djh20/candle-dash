@@ -4,7 +4,6 @@ import 'package:candle_dash/utils.dart';
 import 'package:candle_dash/vehicle/vehicle.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:provider/provider.dart';
 
 enum StandardMetric {
@@ -70,49 +69,47 @@ abstract class Metric with ChangeNotifier {
   Metric({
     required this.id,
     this.unit = Unit.none,
-    this.characteristic,
-  }) {
-    _characteristicSubscription = characteristic?.onValueReceived.listen(_onCharacteristicValueReceived);
-  }
+    this.descriptor,
+  });
 
   final int id;
   final Unit unit;
-  final BluetoothCharacteristic? characteristic;
   String? get displayValue;
+  List<int>? descriptor;
 
-  late final StreamSubscription<List<int>>? _characteristicSubscription;
-  bool _listeningToCharacteristic = false;
+  final _publishStreamController = StreamController<List<int>>.broadcast();
+  Stream<List<int>> get publishStream => _publishStreamController.stream;
 
-  static Future<Metric?> fromCharacteristic(BluetoothCharacteristic characteristic) async {
-    if (!characteristic.device.isConnected) return null;
+  factory Metric.fromDescriptor(List<int> descriptor) {
+    final id = intListToUint16(descriptor.sublist(0, 2));
 
-    final descriptor = characteristic.descriptors.firstWhere((d) => d.uuid == Guid('0000'));
-    late List<int> descriptorData;
-
-    try {
-      descriptorData = await descriptor.read();
-    } catch (err) {
-      debugPrint('Failed to read descriptor: $err');
-      return null;
-    }
-
-    // await characteristic.read();
-    // await characteristic.setNotifyValue(true);
-
-    final id = int.parse(characteristic.uuid.str, radix: 16);
-
-    final metricType = MetricType.values[descriptorData[0]];
-    final unit = Unit.values[descriptorData[1]];
+    final metricType = MetricType.values[descriptor[3]];
+    final unit = Unit.values[descriptor[4]];
 
     if (metricType == MetricType.int) {
-      return MetricInt(id: id, unit: unit, characteristic: characteristic);
+      return MetricInt(
+        id: id, 
+        unit: unit, 
+        descriptor: descriptor.sublist(0, 5),
+      );
 
     } else if (metricType == MetricType.float) {
-      final precision = descriptorData[2];
-      return MetricFloat(id: id, unit: unit, precision: precision, characteristic: characteristic);
-    }
+      return MetricFloat(
+        id: id, 
+        unit: unit, 
+        precision: descriptor[5],
+        descriptor: descriptor.sublist(0, 6),
+      );
 
-    return null;
+    } else {
+      throw Error();
+    }
+  }
+
+  @override
+  void dispose() {
+    _publishStreamController.close();
+    super.dispose();
   }
 
   static T? watch<T extends Metric>(BuildContext context, int metricId) {
@@ -127,33 +124,14 @@ abstract class Metric with ChangeNotifier {
     return metric;
   }
 
-  @override
-  void dispose() {
-    _characteristicSubscription?.cancel();
-    super.dispose();
-  }
-
-  Future<void> readCharacteristic() async {
-    debugPrint('Reading characteristic: ${characteristic!.uuid}');
-    _onCharacteristicValueReceived(await characteristic!.read(timeout: 2));
-  }
-
-  Future<void> listenToCharacteristic() async {
-    if (_listeningToCharacteristic || characteristic == null) return;
-
-    _listeningToCharacteristic = true;
-    debugPrint('Listening to characteristic: ${characteristic!.uuid}');
-    await characteristic!.setNotifyValue(true, timeout: 2);
-  }
-
-  void _onCharacteristicValueReceived(List<int> rawValue);
+  void setValueFromRawData(List<int> data);
 }
 
 class MetricInt extends Metric {
   MetricInt({
     required super.id,
     super.unit,
-    super.characteristic,
+    super.descriptor,
     int? initialValue,
   }) {
     setValue(initialValue);
@@ -166,17 +144,20 @@ class MetricInt extends Metric {
 
   Future<void> setValue(int? newValue, {bool publish = false}) async {
     if (value == newValue) return;
+
+    if (publish) {
+      _publishStreamController.add(int32ToIntList(newValue));
+      return;
+    }
+
     value = newValue;
     notifyListeners();
-    
-    if (publish) {
-      await characteristic?.write(int32ToIntList(value));
-    }
   }
 
   @override
-  void _onCharacteristicValueReceived(List<int> rawValue) {
-    setValue(intListToInt32(rawValue));
+  void setValueFromRawData(List<int> data) {
+    if (data[0] == 0) return;
+    setValue(intListToInt32(data.sublist(1, 5)));
   }
 }
 
@@ -184,7 +165,7 @@ class MetricFloat extends Metric {
   MetricFloat({
     required super.id,
     super.unit,
-    super.characteristic,
+    super.descriptor,
     required this.precision,
     double? initialValue,
   }) {
@@ -199,23 +180,23 @@ class MetricFloat extends Metric {
 
   Future<void> setValue(double? newValue, {bool publish = false}) async {
     if (value == newValue) return;
-    value = newValue;
-    notifyListeners();
 
     if (publish) {
-      int? convertedValue;
-
-      if (value != null) {
-        convertedValue = (value! * pow(10, precision)).toInt();
+      if (newValue != null) {
+        final convertedValue = (newValue * pow(10, precision)).toInt();
+        _publishStreamController.add(int32ToIntList(convertedValue));
       }
-    
-      characteristic?.write(int32ToIntList(convertedValue));
+      return;
     }
+
+    value = newValue;
+    notifyListeners();
   }
  
   @override
-  void _onCharacteristicValueReceived(List<int> rawValue) {
-    final intValue = intListToInt32(rawValue);
-    (intValue != null) ? setValue(intValue / pow(10, precision)) : setValue(null);
+  void setValueFromRawData(List<int> data) {
+    if (data[0] == 0) return;
+    final intValue = intListToInt32(data.sublist(1, 5));
+    setValue(intValue / pow(10, precision));
   }
 }

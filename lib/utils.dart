@@ -22,22 +22,25 @@ num calculateMedian(List<num> values) {
   return median;
 }
 
-int? intListToInt32(List<int> list, {Endian endian = Endian.little}) {
-  if (list.isEmpty) return null;
+int intListToInt32(List<int> list, {Endian endian = Endian.big}) {
   final intList = Int8List.fromList(list);
   return intList.buffer.asByteData().getInt32(0, endian);
 }
 
-int? intListToInt16(List<int> list, {Endian endian = Endian.little}) {
-  if (list.isEmpty) return null;
+int intListToInt16(List<int> list, {Endian endian = Endian.big}) {
   final intList = Int8List.fromList(list);
   return intList.buffer.asByteData().getInt16(0, endian);
 }
 
-List<int> int32ToIntList(int? int32) {
+int intListToUint16(List<int> list, {Endian endian = Endian.big}) {
+  final intList = Uint8List.fromList(list);
+  return intList.buffer.asByteData().getUint16(0, endian);
+}
+
+List<int> int32ToIntList(int? int32, {Endian endian = Endian.big}) {
   if (int32 == null) return const [];
   ByteData byteData = ByteData(4);
-  byteData.setInt32(0, int32, Endian.little);
+  byteData.setInt32(0, int32, endian);
   return byteData.buffer.asUint8List().toList();
 }
 

@@ -25,6 +25,7 @@ class Vehicle with ChangeNotifier {
   VehicleRepresentation? representation;
   List<Metric> metrics = [];
   
+  final List<StreamSubscription> _streams = [];
   StreamSubscription<Position>? _gpsPositionSubscription;
   Position? _gpsPosition;
   bool _disposed = false;
@@ -77,24 +78,41 @@ class Vehicle with ChangeNotifier {
     debugPrint('Vehicle ID: $id');
     _setRepresentation();
 
+    final commandCharacteristic = metricsService.characteristics.firstWhere((c) => c.uuid == Guid(Constants.commandCharacteristicId));
+
     for (final characteristic in metricsService.characteristics) {
-      final metric = await Metric.fromCharacteristic(characteristic);
-      if (metric != null && !_disposed) registerMetric(metric);
-    }
+      if (characteristic == commandCharacteristic) continue;
 
-    /// TODO: Ensure that no value updates are missed.
-    /// At the moment, characteristics are read first and then listened to.
-    /// If a value updates on the bluetooth device between these operations, it will be missed.
-    /// The operations must be performed in this order, otherwise the read operation often fails
-    /// for some reason.
-    for (final metric in metrics) {
-      if (_disposed) return;
-      await metric.readCharacteristic();
-    }
+      final descriptor = characteristic.descriptors.firstWhere((d) => d.uuid == Guid('8C19'));
+      var descriptorData = await descriptor.read();
 
-    for (final metric in metrics) {
-      if (_disposed) return;
-      await metric.listenToCharacteristic();
+      final List<Metric> characteristicMetrics = [];
+
+      while (descriptorData.isNotEmpty) {
+        final metric = Metric.fromDescriptor(descriptorData);
+        if (metric.descriptor != null) {
+          descriptorData = descriptorData.sublist(metric.descriptor!.length);
+        }
+        characteristicMetrics.add(metric);
+        registerMetric(metric);
+        _streams.add(
+          metric.publishStream.listen((data) {
+            if (metric.descriptor == null) return;
+            final fullData = metric.descriptor!.sublist(0, 2) + data;
+            commandCharacteristic.write(fullData);
+          }),
+        );
+      }
+      
+      var characteristicData = await characteristic.read();
+      processCharacteristicData(characteristicData, characteristicMetrics);
+      _streams.add(
+        characteristic.onValueReceived.listen(
+          (data) => processCharacteristicData(data, characteristicMetrics),
+        ),
+      );
+
+      await characteristic.setNotifyValue(true, timeout: 2);
     }
 
     if (!_disposed) await _initGps();
@@ -104,8 +122,20 @@ class Vehicle with ChangeNotifier {
   void dispose() {
     _disposed = true;
     _gpsPositionSubscription?.cancel();
+    for (var stream in _streams) {
+      stream.cancel();
+    }
     _disposeMetrics();
     super.dispose();
+  }
+
+  void processCharacteristicData(List<int> data, List<Metric> characteristicMetrics) {
+    for (final metric in characteristicMetrics) {
+      if (metric.descriptor != null) {
+        final metricData = data.sublist(metric.descriptor![2]);
+        metric.setValueFromRawData(metricData);
+      }
+    }
   }
 
   void registerMetric(Metric newMetric) {
