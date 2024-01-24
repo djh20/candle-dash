@@ -175,6 +175,8 @@ class _TrajectoryPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _TrajectoryPainter oldDelegate) {
-    return oldDelegate.steeringAngle != steeringAngle;
+    return 
+      oldDelegate.steeringAngle != steeringAngle ||
+      oldDelegate.color != color;
   }
 }
