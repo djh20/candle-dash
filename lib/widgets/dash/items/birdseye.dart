@@ -149,7 +149,7 @@ class _TrajectoryPainter extends CustomPainter {
     final double startY = size.height + yOffset;
     
     const double endY = 0;
-    final double controlY = (size.height / 2) + yOffset;
+    final double controlY = (size.height / 3) + yOffset;
 
     final double endXOffset = steeringAngle * 100;
 
