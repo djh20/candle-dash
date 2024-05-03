@@ -7,21 +7,27 @@ abstract class Gizmo extends StatelessWidget {
     this.description,
     required this.height,
     this.padding = const EdgeInsets.only(top: 8, left: 10, right: 10),
+    this.overlay = false,
   });
 
   final String name;
   final String? description;
   final double height;
   final EdgeInsets padding;
+  final bool overlay;
 
   @override
   Widget build(BuildContext context) {
+    final content = buildContent(context);
+
     return Padding(
       padding: padding,
-      child: SizedBox(
-        height: height,
-        child: buildContent(context),
-      ),
+      child: overlay ?
+        Card(
+          margin: EdgeInsets.zero,
+          child: content,
+        )
+        : content,
     );
   }
 

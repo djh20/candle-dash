@@ -62,6 +62,7 @@ class PowerBarSegment extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
+        height: 7,
         decoration: BoxDecoration(
           color: color.withOpacity(0.2),
         ),

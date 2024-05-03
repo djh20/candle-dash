@@ -1,75 +1,83 @@
 import 'dart:ui' as ui;
-
 import 'package:candle_dash/vehicle/metric.dart';
 import 'package:candle_dash/vehicle/vehicle.dart';
-import 'package:candle_dash/widgets/dash/dash_item.dart';
-import 'package:candle_dash/widgets/dash/gizmo.dart';
+import 'package:candle_dash/widgets/dash/new_gizmo.dart';
 import 'package:candle_dash/widgets/dash/property_label.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class BirdseyeGizmo extends Gizmo {
-  const BirdseyeGizmo({super.key}) : super(
+class BirdseyeGizmo extends NewGizmo {
+  const BirdseyeGizmo({super.key, super.overlay}) : super(
     name: 'Birds-eye',
-    height: 350,
   );
-  
+
+  @override
+  State<NewGizmo> createState() => _BirdseyeGizmoState();
+}
+
+class _BirdseyeGizmoState extends NewGizmoState {
   @override
   Widget buildContent(BuildContext context) {
     final vehicleRepresentation = context.select((Vehicle? v) => v?.representation);
     if (vehicleRepresentation == null) return spinner;
-
+    
+    final speed = Metric.watch<MetricFloat>(context, StandardMetric.speed.id)?.value ?? 0;
     final gear = Metric.watch<MetricInt>(context, StandardMetric.gear.id)?.value ?? 0;
+
     final flTirePressure = Metric.watch<MetricFloat>(context, StandardMetric.flTirePressure.id);
     final frTirePressure = Metric.watch<MetricFloat>(context, StandardMetric.frTirePressure.id);
     final rlTirePressure = Metric.watch<MetricFloat>(context, StandardMetric.rlTirePressure.id);
     final rrTirePressure = Metric.watch<MetricFloat>(context, StandardMetric.rrTirePressure.id);
 
-    return DashItem(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          if (gear == VehicleGear.drive.index) const _Trajectory(
-            travelDirection: VerticalDirection.up,
-          ),
-          Stack(
-            alignment: Alignment.center,
-            clipBehavior: Clip.none,
-            children: [
-              Opacity(
-                opacity: 0.5,
-                child: Image.asset(
-                  'assets/renders/${vehicleRepresentation.rendersDirectory}/birdseye.png',
-                  height: 230,
-                ),
+    if (isOverlayVisible && (speed >= 10 || gear == 0)) {
+      hideOverlay();
+    } else if (!isOverlayVisible && gear > 0 && speed == 0) {
+      showOverlay();
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (gear == VehicleGear.drive.index) const _Trajectory(
+          travelDirection: VerticalDirection.up,
+        ),
+        Stack(
+          alignment: Alignment.center,
+          clipBehavior: Clip.none,
+          children: [
+            Opacity(
+              opacity: 0.5,
+              child: Image.asset(
+                'assets/renders/${vehicleRepresentation.rendersDirectory}/birdseye.png',
+                height: 230,
               ),
-              if (flTirePressure != null) _TirePressureLabel(
-                metric: flTirePressure,
-                left: -25,
-                top: 25,
-              ),
-              if (frTirePressure != null) _TirePressureLabel(
-                metric: frTirePressure,
-                right: -25,
-                top: 25,
-              ),
-              if (rlTirePressure != null) _TirePressureLabel(
-                metric: rlTirePressure,
-                left: -25,
-                bottom: 25,
-              ),
-              if (rrTirePressure != null) _TirePressureLabel(
-                metric: rrTirePressure,
-                right: -25,
-                bottom: 25,
-              ),
-            ],
-          ),
-          if (gear == VehicleGear.reverse.index) const _Trajectory(
-            travelDirection: VerticalDirection.down,
-          ),
-        ],
-      ),
+            ),
+            if (flTirePressure != null) _TirePressureLabel(
+              metric: flTirePressure,
+              left: -25,
+              top: 25,
+            ),
+            if (frTirePressure != null) _TirePressureLabel(
+              metric: frTirePressure,
+              right: -25,
+              top: 25,
+            ),
+            if (rlTirePressure != null) _TirePressureLabel(
+              metric: rlTirePressure,
+              left: -25,
+              bottom: 25,
+            ),
+            if (rrTirePressure != null) _TirePressureLabel(
+              metric: rrTirePressure,
+              right: -25,
+              bottom: 25,
+            ),
+          ],
+        ),
+        if (gear == VehicleGear.reverse.index) const _Trajectory(
+          travelDirection: VerticalDirection.down,
+        ),
+      ],
     );
   }
 }

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 class LimitsIndicator extends StatelessWidget {
   const LimitsIndicator({
     super.key,
-    required this.title,
-    required this.subtitle,
+    this.title,
+    required this.displayValue,
     required this.value,
     required this.min,
     required this.max,
@@ -14,8 +14,8 @@ class LimitsIndicator extends StatelessWidget {
     required this.maxColor,
   });
 
-  final Widget title;
-  final Widget subtitle;
+  final Widget? title;
+  final Widget displayValue;
 
   final double value;
   final double min;
@@ -41,11 +41,11 @@ class LimitsIndicator extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DefaultTextStyle.merge(
+        if (title != null) DefaultTextStyle.merge(
           style: const TextStyle(fontSize: 18), 
-          child: title,
+          child: title!,
         ),
-        subtitle,
+        displayValue,
         LinearProgressIndicator(
           value: progress,
           backgroundColor: Theme.of(context).colorScheme.onBackground.withOpacity(0.2),

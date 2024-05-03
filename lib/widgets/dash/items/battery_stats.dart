@@ -1,20 +1,25 @@
 import 'package:candle_dash/vehicle/metric.dart';
-import 'package:candle_dash/widgets/dash/gizmo.dart';
 import 'package:candle_dash/widgets/dash/horizontal_line.dart';
 import 'package:candle_dash/widgets/dash/limits_indicator.dart';
 import 'package:candle_dash/widgets/dash/metric_label.dart';
+import 'package:candle_dash/widgets/dash/new_gizmo.dart';
 import 'package:flutter/material.dart';
 
-class BatteryStatsGizmo extends Gizmo {
-  const BatteryStatsGizmo({super.key}) : super(
+class BatteryStatsGizmo extends NewGizmo {
+  const BatteryStatsGizmo({super.key, super.overlay}) : super(
     name: 'Battery Stats',
-    height: 320,
   );
 
+  @override
+  State<NewGizmo> createState() => _BatteryStatsGizmoState();
+}
+
+class _BatteryStatsGizmoState extends NewGizmoState {
   @override
   Widget buildContent(BuildContext context) {
     final power = Metric.watch<MetricFloat>(context, StandardMetric.hvBattPower.id);
     final voltage = Metric.watch<MetricFloat>(context, StandardMetric.hvBattVoltage.id);
+    final current = Metric.watch<MetricFloat>(context, StandardMetric.hvBattCurrent.id);
     final temperature = Metric.watch<MetricFloat>(context, StandardMetric.hvBattTemperature.id);
     final capacity = Metric.watch<MetricFloat>(context, StandardMetric.hvBattCapacity.id);
     final soh = Metric.watch<MetricFloat>(context, StandardMetric.soh.id);
@@ -27,29 +32,30 @@ class BatteryStatsGizmo extends Gizmo {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'BATTERY',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        
         MetricLabel(
           power,
           fontSize: 40,
         ),
-
-        if (voltage != null) MetricLabel(
-          voltage,
-          fontSize: 22,
+        
+        if (voltage != null && current != null) Row(
+          children: [
+            MetricLabel(
+              voltage,
+              fontSize: 22,
+            ),
+            const HorizontalLine(width: 20),
+            MetricLabel(
+              current,
+              fontSize: 22,
+            ),
+          ],
         ),
 
         const SizedBox(height: 10),
     
         if (temperature != null) LimitsIndicator(
-          title: const Text('Temperature'),
-          subtitle: MetricLabel(temperature),
+          title: const Text('Battery Temperature'),
+          displayValue: MetricLabel(temperature),
           value: temperature.value ?? 0,
           min: 0,
           max: 45,
@@ -61,8 +67,8 @@ class BatteryStatsGizmo extends Gizmo {
         const SizedBox(height: 15),
     
         if (soh != null && capacity != null) LimitsIndicator(
-          title: const Text('Health'),
-          subtitle: Row(
+          title: const Text('Battery Health'),
+          displayValue: Row(
             children: [
               MetricLabel(soh),
               const HorizontalLine(width: 20),

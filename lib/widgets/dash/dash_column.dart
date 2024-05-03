@@ -6,12 +6,14 @@ class DashColumn extends StatelessWidget {
   const DashColumn({
     super.key,
     this.items = const [],
+    this.overlay,
     required this.flex,
     this.alignment = MainAxisAlignment.start,
     this.swipeable = false,
   });
 
   final List<Widget> items;
+  final Widget? overlay;
   final int flex;
   final MainAxisAlignment alignment;
   final bool swipeable;
@@ -38,6 +40,7 @@ class DashColumn extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: items,
             ),
+          if (overlay != null) overlay!,
           if (editing) ...[
             IgnorePointer(
               child: Container(

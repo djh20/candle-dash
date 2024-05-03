@@ -1,15 +1,19 @@
 import 'package:candle_dash/theme.dart';
 import 'package:candle_dash/vehicle/metric.dart';
-import 'package:candle_dash/widgets/dash/gizmo.dart';
 import 'package:candle_dash/widgets/dash/metric_label.dart';
+import 'package:candle_dash/widgets/dash/new_gizmo.dart';
 import 'package:flutter/material.dart';
 
-class BatteryMeterGizmo extends Gizmo {
-  const BatteryMeterGizmo({super.key}) : super(
+class BatteryMeterGizmo extends NewGizmo {
+  const BatteryMeterGizmo({super.key, super.overlay}) : super(
     name: 'Battery Meter',
-    height: 57,
   );
 
+  @override
+  State<NewGizmo> createState() => _BatteryMeterGizmoState();
+}
+
+class _BatteryMeterGizmoState extends NewGizmoState {
   @override
   Widget buildContent(BuildContext context) {
     final soc = Metric.watch<MetricFloat>(context, StandardMetric.soc.id);
