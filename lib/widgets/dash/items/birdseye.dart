@@ -84,6 +84,7 @@ class _BirdseyeGizmoState extends NewGizmoState {
 
 class _TirePressureLabel extends StatelessWidget {
   const _TirePressureLabel({
+    // ignore: unused_element
     super.key,
     required this.metric,
     this.left,
@@ -117,6 +118,7 @@ class _TirePressureLabel extends StatelessWidget {
 
 class _Trajectory extends StatelessWidget {
   const _Trajectory({
+    // ignore: unused_element
     super.key,
     required this.travelDirection,
   });

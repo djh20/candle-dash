@@ -1,4 +1,4 @@
-import 'package:candle_dash/managers/bluetooth_manager.dart';
+import 'package:candle_dash/settings/app_settings.dart';
 import 'package:candle_dash/widgets/dash/dash_column.dart';
 import 'package:candle_dash/widgets/dash/brand_logo.dart';
 import 'package:candle_dash/widgets/dash/horizontal_line.dart';
@@ -12,7 +12,7 @@ class AsleepDashView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isBonded = context.select((BluetoothManager bm) => bm.isBonded);
+    final bool deviceSelected = context.select((AppSettings s) => s.selectedDeviceId != null);
 
     return DashView(
       children: [
@@ -20,7 +20,7 @@ class AsleepDashView extends StatelessWidget {
           alignment: MainAxisAlignment.center,
           flex: 1,
           items: [
-            (isBonded) ? 
+            deviceSelected ? 
               const Padding(
                 padding: EdgeInsets.only(bottom: 8),
                 child: BrandLogo(),
@@ -35,7 +35,7 @@ class AsleepDashView extends StatelessWidget {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     HorizontalLine(),
-                    Text('Not bonded to device'),
+                    Text('No scanner selected'),
                   ],
                 ),
               ),

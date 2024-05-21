@@ -1,6 +1,4 @@
-import 'package:candle_dash/managers/dash_manager.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class DashColumn extends StatelessWidget {
   const DashColumn({
@@ -20,8 +18,6 @@ class DashColumn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final editing = context.select((DashManager dm) => dm.editing);
-
     return Flexible(
       flex: flex,
       fit: FlexFit.tight,
@@ -41,32 +37,6 @@ class DashColumn extends StatelessWidget {
               children: items,
             ),
           if (overlay != null) overlay!,
-          if (editing) ...[
-            IgnorePointer(
-              child: Container(
-                height: MediaQuery.of(context).size.height,
-                margin: const EdgeInsets.all(3.0),
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: Colors.orange,
-                    width: 2,
-                  ),
-                  borderRadius: BorderRadius.circular(5),
-                ),
-              ),
-            ),
-            
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 6),
-                child: IconButton.filledTonal(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () => {}, 
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );

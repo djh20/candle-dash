@@ -1,8 +1,9 @@
 import 'package:candle_dash/settings/app_settings.dart';
 import 'package:candle_dash/theme.dart';
-import 'package:candle_dash/widgets/bluetooth/bluetooth_screen.dart';
-import 'package:candle_dash/widgets/dash/dash_screen.dart';
-import 'package:candle_dash/widgets/home/home_screen.dart';
+import 'package:candle_dash/widgets/pages/app_settings_page.dart';
+import 'package:candle_dash/widgets/pages/bluetooth_page.dart';
+import 'package:candle_dash/widgets/pages/dash_page.dart';
+import 'package:candle_dash/widgets/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -41,9 +42,11 @@ class MyMaterialApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => const HomeScreen(),
-        '/bluetooth': (context) => const BluetoothScreen(),
-        '/dash': (context) => const DashScreen(),
+        '/': (context) => const HomePage(),
+        '/bluetooth': (context) => const BluetoothPage(),
+        '/dash': (context) => const DashPage(),
+        '/app_settings': (context) => const AppSettingsPage(),
+        '/scanner_settings': (context) => const SizedBox(),
       },
     );
   }

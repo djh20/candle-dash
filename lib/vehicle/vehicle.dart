@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:candle_dash/constants.dart';
+import 'package:candle_dash/bluetooth/bluetooth_uuids.dart';
 import 'package:candle_dash/utils.dart';
 import 'package:candle_dash/vehicle/metric.dart';
 import 'package:collection/collection.dart';
@@ -24,11 +24,6 @@ class Vehicle with ChangeNotifier {
   int? id;
   VehicleRepresentation? representation;
   List<Metric> metrics = [];
-  
-  final List<StreamSubscription> _streams = [];
-  StreamSubscription<Position>? _gpsPositionSubscription;
-  Position? _gpsPosition;
-  bool _disposed = false;
 
   // Vehicles without a representation will default to this one.
   // TODO: Use generic renders instead of leaf.
@@ -43,6 +38,11 @@ class Vehicle with ChangeNotifier {
   );
 
   static const List<VehicleRepresentation> representations = [];
+
+  final List<StreamSubscription> _streams = [];
+  StreamSubscription<Position>? _gpsPositionSubscription;
+  Position? _gpsPosition;
+  bool _disposed = false;
 
   Future<void> init(BluetoothDevice device) async {
     if (!device.isConnected) return;
@@ -70,20 +70,20 @@ class Vehicle with ChangeNotifier {
     // Ensure bluetooth has initalized.
     await Future.delayed(const Duration(milliseconds: 100));
 
-    final metricsService = services.firstWhere((m) => m.uuid == Guid.fromString(Constants.metricsServiceId));
-    final configService = services.firstWhere((m) => m.uuid == Guid.fromString(Constants.configServiceId));
+    final metricsService = services.firstWhere((m) => m.uuid == Guid.fromString(BluetoothUuids.metricsService));
+    final configService = services.firstWhere((m) => m.uuid == Guid.fromString(BluetoothUuids.configService));
 
-    final idCharacteristic = configService.characteristics.firstWhere((c) => c.uuid == Guid('0000'));
+    final idCharacteristic = configService.characteristics.firstWhere((c) => c.uuid.str == BluetoothUuids.configVehicleId);
     id = intListToInt16(await idCharacteristic.read());
     debugPrint('Vehicle ID: $id');
     _setRepresentation();
 
-    final commandCharacteristic = metricsService.characteristics.firstWhere((c) => c.uuid == Guid(Constants.commandCharacteristicId));
+    // final commandCharacteristic = metricsService.characteristics.firstWhere((c) => c.uuid == Guid(Constants.commandCharacteristicId));
 
     for (final characteristic in metricsService.characteristics) {
-      if (characteristic == commandCharacteristic) continue;
+      // if (characteristic == commandCharacteristic) continue;
 
-      final descriptor = characteristic.descriptors.firstWhere((d) => d.uuid == Guid('8C19'));
+      final descriptor = characteristic.descriptors.firstWhere((d) => d.uuid.str == BluetoothUuids.metricsDescriptor);
       var descriptorData = await descriptor.read();
 
       final List<Metric> characteristicMetrics = [];
@@ -95,13 +95,13 @@ class Vehicle with ChangeNotifier {
         }
         characteristicMetrics.add(metric);
         registerMetric(metric);
-        _streams.add(
-          metric.publishStream.listen((data) {
-            if (metric.descriptor == null) return;
-            final fullData = metric.descriptor!.sublist(0, 2) + data;
-            commandCharacteristic.write(fullData);
-          }),
-        );
+        // _streams.add(
+        //   metric.publishStream.listen((data) {
+        //     if (metric.descriptor == null) return;
+        //     final fullData = metric.descriptor!.sublist(0, 2) + data;
+        //     commandCharacteristic.write(fullData);
+        //   }),
+        // );
       }
       
       var characteristicData = await characteristic.read();

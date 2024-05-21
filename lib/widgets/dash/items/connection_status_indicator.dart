@@ -1,4 +1,4 @@
-import 'package:candle_dash/managers/bluetooth_manager.dart';
+import 'package:candle_dash/bluetooth/bluetooth_manager.dart';
 import 'package:candle_dash/widgets/dash/gizmo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -14,7 +14,7 @@ class ConnectionStatusIndicatorGizmo extends Gizmo {
   Widget buildContent(BuildContext context) {
     final connectionState = context.select((BluetoothManager bm) => bm.connectionState);
     final isConnected = (connectionState == BluetoothConnectionState.connected);
-    final isConnecting = context.select((BluetoothManager bm) => bm.isConnecting);
+    final connecting = context.select((BluetoothManager bm) => bm.connecting);
 
     String text = 'Not Connected';
     Color backgroundColor = Colors.red;
@@ -24,7 +24,7 @@ class ConnectionStatusIndicatorGizmo extends Gizmo {
       text = 'Connected';
       backgroundColor = Colors.green;
       icon = Icons.bluetooth_connected;
-    } else if (isConnecting) {
+    } else if (connecting) {
       text = 'Connecting...';
       backgroundColor = Colors.orange;
       icon = Icons.bluetooth_searching;

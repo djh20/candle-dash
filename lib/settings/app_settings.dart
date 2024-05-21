@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:candle_dash/bluetooth/known_bluetooth_device.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,27 +19,60 @@ class AppSettings with ChangeNotifier {
 
   late SharedPreferences _prefs;
 
-  ThemeSetting? _theme;
-  ThemeSetting? get theme => _theme;
-  set theme(ThemeSetting? newTheme) => _update(() => _theme = newTheme);
+  ThemeSetting? theme;
+  List<KnownBluetoothDevice>? knownDevices;
+  String? selectedDeviceId;
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
 
-    _theme = ThemeSetting.values[_prefs.getInt('theme') ?? 0];
+    theme = ThemeSetting.values[_prefs.getInt('theme') ?? 0];
+
+    knownDevices = (_prefs.getStringList('knownDevices') ?? <String>[]).map(
+      (json) => KnownBluetoothDevice.fromJson(jsonDecode(json)),
+    ).toList();
+
+    selectedDeviceId = _prefs.getString('selectedDeviceId');
+
     loaded = true;
     notifyListeners();
+    debugPrint('Loaded settings');
   }
 
   Future<void> save() async {
     if (!loaded) return;
 
-    _prefs.setInt('theme', _theme!.index);
+    notifyListeners();
+    
+    _prefs.setStringList('knownDevices', knownDevices!.map((d) => jsonEncode(d)).toList());
+    selectedDeviceId != null ? _prefs.setString('selectedDeviceId', selectedDeviceId!) : _prefs.remove('selectedDeviceId');
+ 
+    _prefs.setInt('theme', theme!.index);
+    debugPrint('Saved settings');
   }
 
-  Future<void> _update(VoidCallback callback) async {
-    callback();
-    notifyListeners();
+  Future<void> update(Function(AppSettings s) callback) async {
+    callback(this);
     await save();
+  }
+  
+  KnownBluetoothDevice? get selectedDevice {
+    if (knownDevices != null && selectedDeviceId != null) {
+      return knownDevices!.firstWhereOrNull((d) => d.id == selectedDeviceId);
+    } else {
+      return null;
+    }
+  }
+
+  Future<void> addKnownDevice(String id, String name) async {
+    if (knownDevices == null || knownDevices!.any((d) => d.id == id)) return;
+
+    await update((_) => knownDevices!.add(KnownBluetoothDevice(id: id, name: name)));
+  }
+
+  Future<void> removeKnownDevice(String id) async {
+    if (knownDevices == null) return;
+    
+    await update((_) => knownDevices!.removeWhere((d) => d.id == id));
   }
 }

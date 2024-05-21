@@ -1,4 +1,4 @@
-import 'package:candle_dash/managers/dash_manager.dart';
+import 'package:candle_dash/dash/dash_manager.dart';
 import 'package:candle_dash/vehicle/dummy_vehicle.dart';
 import 'package:candle_dash/vehicle/metric.dart';
 import 'package:candle_dash/vehicle/vehicle.dart';
@@ -26,14 +26,14 @@ const _hintSnackBar = SnackBar(
   ),
 );
 
-class DashScreen extends StatefulWidget {
-  const DashScreen({super.key});
+class DashPage extends StatefulWidget {
+  const DashPage({super.key});
 
   @override
-  State<DashScreen> createState() => _DashScreenState();
+  State<DashPage> createState() => _DashPageState();
 }
 
-class _DashScreenState extends State<DashScreen> {
+class _DashPageState extends State<DashPage> {
   @override
   void initState() {
     super.initState();
@@ -62,19 +62,20 @@ class _DashScreenState extends State<DashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final editing = context.select((DashManager dm) => dm.editing);
+    final preview = context.select((DashManager dm) => dm.preview);
 
-    if (!editing) return const _DashScreenContent();
+    if (!preview) return const _DashPageContent();
 
     return ChangeNotifierProvider<Vehicle?>(
       create: (_) => DummyVehicle(),
-      child: const _DashScreenContent(),
+      child: const _DashPageContent(),
     );
   }
 }
 
-class _DashScreenContent extends StatelessWidget {
-  const _DashScreenContent({super.key});
+class _DashPageContent extends StatelessWidget {
+  // ignore: unused_element
+  const _DashPageContent({super.key});
 
   @override
   Widget build(BuildContext context) {

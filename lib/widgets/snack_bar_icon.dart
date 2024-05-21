@@ -7,7 +7,7 @@ class SnackBarIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.background;
+    final color = Theme.of(context).colorScheme.surface;
     return Icon(
       icon,
       color: color,

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 final lightColorScheme = ColorScheme.fromSeed(seedColor: Colors.blue);
 
 const darkColorScheme = ColorScheme.dark(
-  primary: Color.fromRGBO(238, 210, 149, 1),
+  // primary: Color.fromRGBO(238, 210, 149, 1),
+  primary: Color.fromRGBO(149, 198, 238, 1),
   secondary: Color.fromRGBO(221, 221, 221, 1),
 );
 

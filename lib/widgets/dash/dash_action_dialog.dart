@@ -1,4 +1,4 @@
-import 'package:candle_dash/managers/dash_manager.dart';
+import 'package:candle_dash/dash/dash_manager.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,8 +7,8 @@ class DashActionDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final editing = context.select((DashManager dm) => dm.editing);
-    final toggleEditing = context.select((DashManager dm) => dm.toggleEditing);
+    final preview = context.select((DashManager dm) => dm.preview);
+    final togglePreview = context.select((DashManager dm) => dm.togglePreview);
 
     return AlertDialog(
       content: Column(
@@ -16,38 +16,18 @@ class DashActionDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           FilledButton.icon(
-            label: const Text('Close Dash'),
+            label: const Text('Close Dashboard'),
             icon: const Icon(Icons.close),
             onPressed: () => Navigator.of(context).popUntil((route) => route.isFirst), 
           ),
-          if (!editing) FilledButton.tonalIcon(
-            label: const Text('Enable Edit Mode'),
-            icon: const Icon(Icons.edit),
+          FilledButton.tonalIcon(
+            label: Text(!preview ? 'Enable Preview Mode' : 'Disable Preview Mode'),
+            icon: Icon(!preview ? Icons.visibility : Icons.visibility_off),
             onPressed: () {
-              toggleEditing();
+              togglePreview();
               pop(context);
             },
           ),
-          if (editing) ...[
-            FilledButton.tonalIcon(
-              label: const Text('Save Layout'),
-              icon: const Icon(Icons.save),
-              onPressed: () {},
-            ),
-            FilledButton.tonalIcon(
-              label: const Text('Change Layout'),
-              icon: const Icon(Icons.layers),
-              onPressed: () {},
-            ),
-            FilledButton.tonalIcon(
-              label: const Text('Disable Edit Mode'),
-              icon: const Icon(Icons.edit_off),
-              onPressed: () {
-                toggleEditing();
-                pop(context);
-              },
-            ),
-          ],
           TextButton(
             child: const Text('Dismiss'),
             onPressed: () => pop(context),

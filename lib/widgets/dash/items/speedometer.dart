@@ -29,6 +29,7 @@ class SpeedometerGizmo extends Gizmo {
 
 class _Speedo extends StatefulWidget {
   const _Speedo({
+    // ignore: unused_element
     super.key,
     required this.speed,
   });
@@ -61,6 +62,7 @@ class _SpeedoState extends State<_Speedo> {
 }
 
 class _Sideprofile extends StatelessWidget {
+  // ignore: unused_element
   const _Sideprofile({super.key});
 
   @override
@@ -100,6 +102,7 @@ class _Sideprofile extends StatelessWidget {
 
 class _BatteryPack extends StatelessWidget {
   const _BatteryPack({
+    // ignore: unused_element
     super.key,
     required this.alignment,
     required this.widthFactor,

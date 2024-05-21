@@ -5,11 +5,11 @@ class ScanResultTile extends StatelessWidget {
   const ScanResultTile({
     super.key,
     required this.result,
-    this.onConnectIntent,
+    this.onAddIntent,
   });
 
   final ScanResult result;
-  final VoidCallback? onConnectIntent;
+  final VoidCallback? onAddIntent;
 
   @override
   Widget build(BuildContext context) {
@@ -19,9 +19,10 @@ class ScanResultTile extends StatelessWidget {
       child: ListTile(
         title: Text(device.advName.isNotEmpty ? device.advName : 'Unknown'),
         subtitle: Text(device.remoteId.str),
-        trailing: TextButton(
-          onPressed: onConnectIntent,
-          child: const Text('Connect'),
+        trailing: FilledButton.tonalIcon(
+          icon: const Icon(Icons.add),
+          label: const Text('Add'),
+          onPressed: onAddIntent,
         ),
       ),
     );
