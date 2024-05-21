@@ -1,27 +1,24 @@
 import 'package:candle_dash/bluetooth/bluetooth_manager.dart';
 import 'package:candle_dash/settings/app_settings.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:provider/provider.dart';
-import 'package:skeletonizer/skeletonizer.dart';
 
 class ConnectionStatusTile extends StatelessWidget {
   const ConnectionStatusTile({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final deviceSelected = context.select((AppSettings s) => s.selectedDeviceId != null);
+    final isDeviceSelected = context.select((AppSettings s) => s.selectedDeviceId != null);
     final statusMessage = context.select((BluetoothManager bm) => bm.statusMessage);
-    final connectionState = context.select((BluetoothManager bm) => bm.connectionState);
 
-    final connected = connectionState == BluetoothConnectionState.connected;
-    final connecting = context.select((BluetoothManager bm) => bm.connecting);
+    final isConnected = context.select((BluetoothManager bm) => bm.isConnected);
+    final isConnecting = context.select((BluetoothManager bm) => bm.isConnecting);
 
     final String title = 
-      connected ? 'Connected' : connecting ? 'Connecting' : 'Not Connected';
+      isConnected ? 'Connected' : isConnecting ? 'Connecting' : 'Not Connected';
 
     final Color color =
-      connected ? Colors.green : connecting ? Colors.orange[600]! : Colors.red;
+      isConnected ? Colors.green : isConnecting ? Colors.orange[600]! : Colors.red;
     
     return ListTile(
       leading: Icon(
@@ -36,7 +33,7 @@ class ConnectionStatusTile extends StatelessWidget {
         ),
       ),
       subtitle: Text(
-        (deviceSelected && statusMessage != null) ? statusMessage : 'Please select a scanner',
+        (isDeviceSelected && statusMessage != null) ? statusMessage : 'Please select a scanner',
       ),
     );
   }

@@ -11,7 +11,7 @@ class BluetoothPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final settings = context.read<AppSettings>();
     final bluetoothManager = context.read<BluetoothManager>();
-    final scanning = context.select((BluetoothManager bm) => bm.scanning);
+    final isScanning = context.select((BluetoothManager bm) => bm.isScanning);
     final scanResults = context.select((BluetoothManager bm) => bm.scanResults);
     
     final validScanResults = scanResults.where(
@@ -39,7 +39,7 @@ class BluetoothPage extends StatelessWidget {
           },
         ),
         floatingActionButton: FloatingActionButton(
-          child: Icon(scanning ? Icons.close : Icons.refresh),
+          child: Icon(isScanning ? Icons.close : Icons.refresh),
           onPressed: () => bluetoothManager.toggleScan(),
         ),
       ),

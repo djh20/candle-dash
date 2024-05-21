@@ -15,7 +15,7 @@ enum ThemeSetting {
 }
 
 class AppSettings with ChangeNotifier {
-  bool loaded = false;
+  bool isLoaded = false;
 
   late SharedPreferences _prefs;
 
@@ -34,13 +34,13 @@ class AppSettings with ChangeNotifier {
 
     selectedDeviceId = _prefs.getString('selectedDeviceId');
 
-    loaded = true;
+    isLoaded = true;
     notifyListeners();
     debugPrint('Loaded settings');
   }
 
   Future<void> save() async {
-    if (!loaded) return;
+    if (!isLoaded) return;
 
     notifyListeners();
     

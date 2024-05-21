@@ -1,41 +1,69 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math';
 import 'package:candle_dash/settings/app_settings.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
 class BluetoothManager with ChangeNotifier {
+  /// The bluetooth device involved in an ongoing connection attempt or established 
+  /// connection.
   BluetoothDevice? currentDevice;
 
   BluetoothConnectionState connectionState = BluetoothConnectionState.disconnected;
-  bool get connected => connectionState == BluetoothConnectionState.connected;
-  bool enabled = true;
-  bool scanning = false;
-  bool connecting = false;
-  String? statusMessage;
+  bool isEnabled = true;
+  bool isScanning = false;
+  bool isConnecting = false;
+  bool get isConnected => connectionState == BluetoothConnectionState.connected;
   List<ScanResult> scanResults = [];
-  
-  int _countdown = 0;
-  int _countdownStart = 5;
 
+  /// An informative message describing the current task.
+  String? statusMessage;
+
+  /// The MAC address of the target device (as specified in app settings).
   String? _targetDeviceId;
-  AppSettings _appSettings;
 
-  final _globalConnectionStateStreamController = StreamController<BluetoothConnectionState?>.broadcast();
-  Stream<BluetoothConnectionState?> get globalConnectionStateStream => _globalConnectionStateStreamController.stream;
+  final AppSettings _appSettings;
+
+  /// The number of seconds remaining before attempting to connect/reconnect to the target
+  /// device.
+  int _countdown = 0;
+
+  /// The total duration (in seconds) of the countdown used for connecting/reconnecting.
+  /// 
+  /// This is increased by a factor of two whenever a failed connection attempt occurs.
+  /// The value is reset to zero after a successful connection or when the bluetooth
+  /// manager is re-enabled.
+  int _countdownDuration = 0;
+
+  /// Specifies the upper limit of [_countdownDuration].
+  static const int _minCountdownDuration = 1;
+
+  /// Specifies the lower limit of [_countdownDuration].
+  /// 
+  /// This value is ignored on the first connection attempt, which always uses a duration
+  /// of zero seconds.
+  static const int _maxCountdownDuration = 20;
+
+  /// Runs the [_doCountdown()] method once every second.
+  late Timer _countdownPeriodicTimer;
+
+  final _globalConnectionStateStreamController = 
+    StreamController<BluetoothConnectionState?>.broadcast();
+  
+  Stream<BluetoothConnectionState?> get globalConnectionStateStream => 
+    _globalConnectionStateStreamController.stream;
 
   BluetoothAdapterState _adapterState = BluetoothAdapterState.unknown;
   
   late StreamSubscription<BluetoothAdapterState> _adapterStateSubscription;
   late StreamSubscription<List<ScanResult>> _scanResultsSubscription;
-  late StreamSubscription<bool> _scanningSubscription;
+  late StreamSubscription<bool> _isScanningSubscription;
 
   StreamSubscription<BluetoothConnectionState>? _connectionStateSubscription;
 
-  late Timer _countdownPeriodicTimer;
-  // Timer? _reconnectTimer;
+  /// Used during the connection process when scanning for the target device.
   Completer<BluetoothDevice?>? _targetDeviceCompleter;
 
   BluetoothManager(AppSettings settings) :
@@ -46,14 +74,11 @@ class BluetoothManager with ChangeNotifier {
     
     _targetDeviceId = _appSettings.selectedDeviceId;
 
-    _adapterStateSubscription = FlutterBluePlus.adapterState.listen((state) {
-      _adapterState = state;
-      notifyListeners();
-    });
-
+    _adapterStateSubscription = FlutterBluePlus.adapterState.listen(
+      (state) => _adapterState = state,
+    );
     _scanResultsSubscription = FlutterBluePlus.scanResults.listen(_onScanResults);
-
-    _scanningSubscription = FlutterBluePlus.isScanning.listen(_onScanStateUpdate);
+    _isScanningSubscription = FlutterBluePlus.isScanning.listen(_onScanStateUpdate);
 
     _countdownPeriodicTimer = Timer.periodic(
       const Duration(seconds: 1), 
@@ -68,22 +93,18 @@ class BluetoothManager with ChangeNotifier {
     _appSettings.removeListener(_onSettingsUpdate);
     _adapterStateSubscription.cancel();
     _scanResultsSubscription.cancel();
-    _scanningSubscription.cancel();
+    _isScanningSubscription.cancel();
     _countdownPeriodicTimer.cancel();
     super.dispose();
   }
 
   Future<void> startScan() async {
-    if (scanning) return;
+    if (isScanning) return;
 
     if (_adapterState != BluetoothAdapterState.on) {
       debugPrint('Turning on bluetooth');
       if (Platform.isAndroid) {
-        try {
-          await FlutterBluePlus.turnOn();
-        } on PlatformException catch (err) {
-          debugPrint(err.toString());
-        }
+        await FlutterBluePlus.turnOn();
       }
     }
 
@@ -98,12 +119,12 @@ class BluetoothManager with ChangeNotifier {
   }
 
   Future<void> stopScan() async {
-    if (!scanning) return;
+    if (!isScanning) return;
     await FlutterBluePlus.stopScan();
   }
 
   Future<void> toggleScan() async {
-    if (scanning) {
+    if (isScanning) {
       await stopScan();
     } else {
       await startScan();
@@ -111,16 +132,14 @@ class BluetoothManager with ChangeNotifier {
   }
 
   Future<void> connectToTargetDevice() async {
-    if (!enabled || _targetDeviceId == null) return;
+    if (!isEnabled || _targetDeviceId == null) return;
 
-    connecting = true;
+    isConnecting = true;
 
     BluetoothDevice? device = _getTargetDeviceFromScan();
 
     if (device == null) {
-      statusMessage = 'Searching for target device';
-      notifyListeners();
-      debugPrint(statusMessage);
+      _setStatusMessage('Searching for target device');
       
       _targetDeviceCompleter = Completer();
       await startScan();
@@ -130,43 +149,42 @@ class BluetoothManager with ChangeNotifier {
     if (device != null) {
       await connectToDevice(device);
     } else {
-      statusMessage = 'Failed to find target device';
-      notifyListeners();
-      _countdown = 5;
-      debugPrint(statusMessage);
+      _setStatusMessage('Failed to find target device');
+      throw Exception(statusMessage);
     }
-
-    connecting = false;
   }
 
   Future<void> connectToDevice(BluetoothDevice device) async {
-    if (!enabled) return;
+    if (!isEnabled) return;
     debugPrint('Connecting to ${device.advName} (${device.remoteId.str})');
-    statusMessage = 'MAC: ${device.remoteId.str}';
     
     _connectionStateSubscription = device.connectionState.listen(_updateConnectionState);
-
-    connecting = true;
+    isConnecting = true;
     currentDevice = device;
-    // selectedDeviceId = device.remoteId.str;
     notifyListeners();
 
-    try {
-      await device.connect(timeout: const Duration(seconds: 5), mtu: 115);
-      debugPrint('Connected to ${device.advName} (${device.remoteId.str})');
+    _setStatusMessage('Establishing connection');
+    await device.connect(timeout: const Duration(seconds: 5));
+    debugPrint('Connected to ${device.advName} (${device.remoteId.str})');
 
-    } on FlutterBluePlusException catch (err) {
-      debugPrint(err.toString());
-      statusMessage = 'Failed to connect';
-      notifyListeners();
-      _countdown = 5;
-      await disconnect();
-      // scheduleReconnect();
-    }
+    _setStatusMessage('Requesting high priority');
+    await device.requestConnectionPriority(
+      connectionPriorityRequest: ConnectionPriority.high,
+    );
+
+    _setStatusMessage('Discovering services');
+    await device.discoverServices();
+
+    _setStatusMessage('MAC: ${device.remoteId.str}');
+
+    // Ensure bluetooth has initalized.
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    _resetCountdown();
   }
 
   Future<void> disconnect() async {
-    connecting = false;
+    isConnecting = false;
     _updateConnectionState(BluetoothConnectionState.disconnected);
     notifyListeners();
     
@@ -177,41 +195,62 @@ class BluetoothManager with ChangeNotifier {
   }
 
   Future<void> enable() async {
-    enabled = true;
-    _countdown = 0;
+    isEnabled = true;
+    _resetCountdown();
   }
 
   Future<void> disable() async {
-    enabled = false;
+    isEnabled = false;
     await stopScan();
     await disconnect();
   }
 
-  void _onSettingsUpdate() {
+  Future<void> _onSettingsUpdate() async {
     if (_targetDeviceId != _appSettings.selectedDeviceId) {
       _targetDeviceId = _appSettings.selectedDeviceId;
-      disconnect();
+      _resetCountdown();
+      await disconnect();
     }
   }
 
   Future<void> _doCountdown() async {
-    if (!enabled || _targetDeviceId == null) return;
-    if (connecting || connectionState == BluetoothConnectionState.connected) return;
+    if (
+      !isEnabled || _targetDeviceId == null ||
+      isConnecting || isConnected
+    ) return;
 
     if (_countdown > 0) {
       _countdown--;
-      statusMessage = 'Retrying in ${_countdown}s';
-      notifyListeners();
+      _setStatusMessage('Retrying in ${_countdown}s');
     }
 
-    if (_countdown <= 0) await connectToTargetDevice();
+    if (_countdown <= 0) {
+      await connectToTargetDevice().catchError((err) async {
+        _setStatusMessage(err.toString());
+        _increaseCountdown();
+        await disconnect();
+      });
+    }
+  }
+
+  void _increaseCountdown() {
+    _countdownDuration = max(
+      min(_countdownDuration*2, _maxCountdownDuration),
+      _minCountdownDuration,
+    );
+    _countdown = _countdownDuration;
+  }
+
+  void _resetCountdown() {
+    _countdown = 0;
+    _countdownDuration = 0;
   }
 
   void _onScanStateUpdate(bool state) {
-    scanning = state;
+    isScanning = state;
     notifyListeners();
 
-    if (!scanning) {
+    if (!isScanning) {
       _targetDeviceCompleter?.complete(null);
       _targetDeviceCompleter = null;
     }
@@ -231,15 +270,22 @@ class BluetoothManager with ChangeNotifier {
     }
   }
 
-  BluetoothDevice? _getTargetDeviceFromScan() {
-    return scanResults.firstWhereOrNull((r) => r.device.remoteId.str == _targetDeviceId)?.device;
+  void _setStatusMessage(String message) {
+    statusMessage = message;
+    debugPrint('Bluetooth: $statusMessage');
+    notifyListeners();
   }
+
+  BluetoothDevice? _getTargetDeviceFromScan() =>
+    scanResults.firstWhereOrNull(
+      (r) => r.device.remoteId.str == _targetDeviceId,
+    )?.device;
 
   void _updateConnectionState(BluetoothConnectionState state) {
     if (connectionState == state) return;
 
     if (state == BluetoothConnectionState.connected) {
-      connecting = false;
+      isConnecting = false;
     }
 
     connectionState = state;

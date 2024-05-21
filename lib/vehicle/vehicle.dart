@@ -47,43 +47,27 @@ class Vehicle with ChangeNotifier {
   Future<void> init(BluetoothDevice device) async {
     if (!device.isConnected) return;
 
-    try {
-      await device.requestConnectionPriority(connectionPriorityRequest: ConnectionPriority.high);
-    } catch (err) {
-      debugPrint('Failed to request connection priority: $err');
-      return;
-    }
+    final metricsService = device.servicesList.firstWhere(
+      (m) => m.uuid == Guid.fromString(BluetoothUuids.metricsService),
+    );
 
-    late List<BluetoothService> services;
+    final configService = device.servicesList.firstWhere(
+      (m) => m.uuid == Guid.fromString(BluetoothUuids.configService),
+    );
 
-    try {
-      services = await device.discoverServices();
-    } catch (err) {
-      debugPrint('Failed to discover services: $err');
-      return;
-    }
+    final vehicleIdCharacteristic = configService.characteristics.firstWhere(
+      (c) => c.uuid == Guid.fromString(BluetoothUuids.configVehicleId),
+    );
 
-    for (final service in services) {
-      debugPrint('Discovered service: ${service.uuid.str}');
-    }
-
-    // Ensure bluetooth has initalized.
-    await Future.delayed(const Duration(milliseconds: 100));
-
-    final metricsService = services.firstWhere((m) => m.uuid == Guid.fromString(BluetoothUuids.metricsService));
-    final configService = services.firstWhere((m) => m.uuid == Guid.fromString(BluetoothUuids.configService));
-
-    final idCharacteristic = configService.characteristics.firstWhere((c) => c.uuid.str == BluetoothUuids.configVehicleId);
-    id = intListToInt16(await idCharacteristic.read());
+    id = intListToInt16(await vehicleIdCharacteristic.read());
     debugPrint('Vehicle ID: $id');
     _setRepresentation();
 
-    // final commandCharacteristic = metricsService.characteristics.firstWhere((c) => c.uuid == Guid(Constants.commandCharacteristicId));
-
     for (final characteristic in metricsService.characteristics) {
-      // if (characteristic == commandCharacteristic) continue;
+      final descriptor = characteristic.descriptors.firstWhere(
+        (d) => d.uuid == Guid.fromString(BluetoothUuids.metricsDescriptor),
+      );
 
-      final descriptor = characteristic.descriptors.firstWhere((d) => d.uuid.str == BluetoothUuids.metricsDescriptor);
       var descriptorData = await descriptor.read();
 
       final List<Metric> characteristicMetrics = [];
