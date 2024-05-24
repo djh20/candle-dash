@@ -48,7 +48,7 @@ class LimitsIndicator extends StatelessWidget {
         displayValue,
         LinearProgressIndicator(
           value: progress,
-          backgroundColor: Theme.of(context).colorScheme.onBackground.withOpacity(0.2),
+          backgroundColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
           color: color,
         ),
       ],

@@ -39,58 +39,31 @@ class _SettingsPageState extends State<AppSettingsPage> {
 
           const Divider(),
 
-          const ListTile(
-            leading: Icon(Icons.dashboard),
-            title: Text('Auto Dashboard'),
-            // subtitle: const Text('Opens the dashboard when the app is launched.'),
-            subtitle: Text('Coming soon...'),
-            trailing: Switch(
-              value: false,
-              onChanged: null,
-            ),
-            enabled: false,
-          ),
+          // const ListTile(
+          //   leading: Icon(Icons.dashboard),
+          //   title: Text('Auto Dashboard'),
+          //   // subtitle: const Text('Opens the dashboard when the app is launched'),
+          //   subtitle: Text('Coming soon...'),
+          //   trailing: Switch(
+          //     value: false,
+          //     onChanged: null,
+          //   ),
+          //   enabled: false,
+          // ),
 
-          const ListTile(
-            leading: Icon(Icons.science),
-            title: Text('Experimental Mode'),
-            // subtitle: const Text('Allows installation of beta releases.'),
-            subtitle: Text('Coming soon...'),
+          ListTile(
+            leading: const Icon(Icons.science),
+            title: const Text('Experimental Mode'),
+            subtitle: const Text('Enables installation of beta builds'),
             trailing: Switch(
-              value: false,
-              onChanged: null,
+              value: settings.experimentalMode ?? false,
+              onChanged: 
+                settings.experimentalMode != null ? 
+                (value) => settings.update((s) => s.experimentalMode = value) : null,
             ),
-            enabled: false,
           ),
         ],
       ),
-    );
-  }
-}
-
-
-class _SettingHeader extends StatelessWidget {
-  const _SettingHeader({
-    // ignore: unused_element
-    super.key,
-    required this.title,
-    required this.icon
-  });
-
-  final String title;
-  final IconData icon;
-  
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon),
-        const SizedBox(width: 5),
-        Text(
-          title,
-          style: const TextStyle(fontSize: 20),
-        ),
-      ],
     );
   }
 }

@@ -108,7 +108,7 @@ class _TirePressureLabel extends StatelessWidget {
       bottom: bottom,
       child: PropertyLabel(
         value: metric.displayValue,
-        valueColor: Theme.of(context).colorScheme.onBackground.withOpacity(0.4),
+        valueColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
         fontSize: 20,
         unit: Unit.none,
       ),
@@ -134,7 +134,7 @@ class _Trajectory extends StatelessWidget {
       child: CustomPaint(
         painter: _TrajectoryPainter(
           steeringAngle: steeringAngle,
-          color: Theme.of(context).colorScheme.onBackground,
+          color: Theme.of(context).colorScheme.onSurface,
         ),
         size: const Size(double.infinity, 100),
       ),

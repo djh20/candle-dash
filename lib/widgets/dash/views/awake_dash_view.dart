@@ -27,7 +27,7 @@ class AwakeDashView extends StatelessWidget {
             Divider(
               indent: 10,
               endIndent: 10,
-              color: Theme.of(context).colorScheme.onBackground.withOpacity(0.2),
+              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
             ),
             const StatusIconsDashItem(),
           ],

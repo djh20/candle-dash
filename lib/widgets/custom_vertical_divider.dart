@@ -18,7 +18,7 @@ class CustomVerticalDivider extends StatelessWidget {
       width: width,
       indent: indent,
       endIndent: endIndent,
-      color: Theme.of(context).colorScheme.onBackground.withOpacity(0.2),
+      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
     );
   }
 }

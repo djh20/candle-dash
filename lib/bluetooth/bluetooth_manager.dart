@@ -11,15 +11,20 @@ class BluetoothManager with ChangeNotifier {
   /// connection.
   BluetoothDevice? currentDevice;
 
-  BluetoothConnectionState connectionState = BluetoothConnectionState.disconnected;
   bool isEnabled = true;
   bool isScanning = false;
   bool isConnecting = false;
-  bool get isConnected => connectionState == BluetoothConnectionState.connected;
+  bool isConnected = false;
   List<ScanResult> scanResults = [];
 
   /// An informative message describing the current task.
   String? statusMessage;
+
+  /// The connection state according to FlutterBluePlus. 
+  /// 
+  /// Note: This is **not** indicative of whether initialization procedures have completed
+  /// (e.g. requesting connecting priority, discovering services).
+  BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
 
   /// The MAC address of the target device (as specified in app settings).
   String? _targetDeviceId;
@@ -49,12 +54,6 @@ class BluetoothManager with ChangeNotifier {
   /// Runs the [_doCountdown()] method once every second.
   late Timer _countdownPeriodicTimer;
 
-  final _globalConnectionStateStreamController = 
-    StreamController<BluetoothConnectionState?>.broadcast();
-  
-  Stream<BluetoothConnectionState?> get globalConnectionStateStream => 
-    _globalConnectionStateStreamController.stream;
-
   BluetoothAdapterState _adapterState = BluetoothAdapterState.unknown;
   
   late StreamSubscription<BluetoothAdapterState> _adapterStateSubscription;
@@ -66,8 +65,8 @@ class BluetoothManager with ChangeNotifier {
   /// Used during the connection process when scanning for the target device.
   Completer<BluetoothDevice?>? _targetDeviceCompleter;
 
-  BluetoothManager(AppSettings settings) :
-    _appSettings = settings;
+  BluetoothManager(AppSettings appSettings) :
+    _appSettings = appSettings;
 
   void init() {
     FlutterBluePlus.setLogLevel(LogLevel.error, color: false);
@@ -163,7 +162,7 @@ class BluetoothManager with ChangeNotifier {
     currentDevice = device;
     notifyListeners();
 
-    _setStatusMessage('Establishing connection');
+    _setStatusMessage('Attempting to contact device');
     await device.connect(timeout: const Duration(seconds: 5));
     debugPrint('Connected to ${device.advName} (${device.remoteId.str})');
 
@@ -175,7 +174,10 @@ class BluetoothManager with ChangeNotifier {
     _setStatusMessage('Discovering services');
     await device.discoverServices();
 
-    _setStatusMessage('MAC: ${device.remoteId.str}');
+    statusMessage = 'MAC: ${device.remoteId.str}';
+    isConnected = true;
+    isConnecting = false;
+    notifyListeners();
 
     // Ensure bluetooth has initalized.
     await Future.delayed(const Duration(milliseconds: 100));
@@ -185,7 +187,10 @@ class BluetoothManager with ChangeNotifier {
 
   Future<void> disconnect() async {
     isConnecting = false;
+    isConnected = false;
     _updateConnectionState(BluetoothConnectionState.disconnected);
+    scanResults.clear();
+    statusMessage = null;
     notifyListeners();
     
     await currentDevice?.disconnect(queue: false);
@@ -226,7 +231,8 @@ class BluetoothManager with ChangeNotifier {
 
     if (_countdown <= 0) {
       await connectToTargetDevice().catchError((err) async {
-        _setStatusMessage(err.toString());
+        _setStatusMessage('Failed to connect');
+        debugPrint(err.toString());
         _increaseCountdown();
         await disconnect();
       });
@@ -282,14 +288,13 @@ class BluetoothManager with ChangeNotifier {
     )?.device;
 
   void _updateConnectionState(BluetoothConnectionState state) {
-    if (connectionState == state) return;
+    if (_connectionState == state) return;
 
-    if (state == BluetoothConnectionState.connected) {
-      isConnecting = false;
+    if (state == BluetoothConnectionState.disconnected) {
+      isConnected = false;
+      notifyListeners();
     }
 
-    connectionState = state;
-    notifyListeners();
-    _globalConnectionStateStreamController.add(state);
+    _connectionState = state;
   }
 }

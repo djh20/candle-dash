@@ -33,7 +33,7 @@ abstract class NewGizmoState extends State<NewGizmo> {
         duration: const Duration(milliseconds: 250),
         child: Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.background.withOpacity(0.95),
+            color: Theme.of(context).colorScheme.surface.withOpacity(0.95),
           ),
           child: content,
         ),

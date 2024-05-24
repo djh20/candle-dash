@@ -1,6 +1,7 @@
 import 'package:candle_dash/bluetooth/bluetooth_manager.dart';
 import 'package:candle_dash/bluetooth/known_bluetooth_device.dart';
 import 'package:candle_dash/settings/app_settings.dart';
+import 'package:candle_dash/widgets/bluetooth/remove_device_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,8 +17,8 @@ class DeviceSelectorSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bluetoothManager = context.read<BluetoothManager>();
     final settings = context.watch<AppSettings>();
+    final bluetoothManager = context.read<BluetoothManager>();
 
     final bool deviceSelected = settings.selectedDeviceId != null;
 
@@ -42,10 +43,10 @@ class DeviceSelectorSheet extends StatelessWidget {
                 FilledButton.icon(
                   icon: const Icon(Icons.add),
                   label: const Text('Add Scanner'),
-                  onPressed: () {
-                    Navigator.pushReplacementNamed(context, '/bluetooth');
+                  onPressed: !deviceSelected ? () {
+                    Navigator.pushNamed(context, '/bluetooth');
                     bluetoothManager.startScan();
-                  },
+                  } : null,
                 ),
                 if (devicesAvailable)
                   IconButton.filledTonal(
@@ -74,6 +75,7 @@ class _DeviceSelectorSheetList extends StatelessWidget {
   });
 
   final List<KnownBluetoothDevice> devices;
+  
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +106,10 @@ class _DeviceSelectorSheetList extends StatelessWidget {
                 ),
                 const VerticalDivider(width: 5.0),
                 IconButton(
-                  onPressed: () => settings.removeKnownDevice(device.id), 
+                  onPressed: () => showDialog(
+                    context: context,
+                    builder: (_) => RemoveDeviceDialog(device: device),
+                  ), 
                   visualDensity: VisualDensity.compact,
                   icon: const Icon(Icons.delete),
                 ),

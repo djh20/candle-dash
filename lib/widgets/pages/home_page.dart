@@ -1,8 +1,11 @@
 import 'package:candle_dash/settings/app_settings.dart';
+import 'package:candle_dash/update_manager.dart';
 import 'package:candle_dash/widgets/bluetooth/device_selector_sheet.dart';
 import 'package:candle_dash/widgets/home/connection_status_tile.dart';
+import 'package:candle_dash/widgets/home/update_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:version/version.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -10,6 +13,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<AppSettings>();
+    final updateManager = context.watch<UpdateManager>();
 
     return Scaffold(
       appBar: AppBar(
@@ -37,33 +41,29 @@ class HomePage extends StatelessWidget {
           const ConnectionStatusTile(),
           const Divider(),
 
-          // const ListTile(
-          //   leading: Icon(Icons.done),
-          //   title: Text('App Version'),
-          //   subtitle: Text('1.8.2+4'),
-          //   trailing: TextButton(
-          //     onPressed: null,
-          //     child: Text('Up to Date'),
-          //   ),
+          UpdateTile(
+            name: 'App',
+            availability: updateManager.appUpdateAvailability,
+            currentVersion: updateManager.currentAppVersion,
+            latestVersion: updateManager.latestAppVersion,
+            onUpdatePressed: () {},
+          ),
+
+          // UpdateTile(
+          //   name: 'Firmware',
+          //   availability: UpdateAvailability.unknown,
+          //   // currentVersion: Version.parse('0.0.1-b4'),
+          //   // latestVersion: Version.parse('0.0.2'),
+          //   onUpdatePressed: () {},
+          //   enabled: false,
           // ),
-
-          const ListTile(
-            leading: Icon(Icons.cloud_off),
-            title: Text('App Version'),
-            subtitle: Text('1.8.2+4'),
-          ),
-
-          const ListTile(
-            leading: Icon(Icons.bluetooth_disabled),
-            title: Text('Firmware Version'),
-            subtitle: Text('N/A'),
-            enabled: false,
-          ),
 
           FilledButton.tonalIcon(
             icon: const Icon(Icons.update), 
             label: const Text('Check for Updates'),
-            onPressed: () {},
+            onPressed:
+              !updateManager.isCheckingForUpdates ? 
+              () => updateManager.checkForUpdates() : null,
           ),
 
           const Divider(),
@@ -88,7 +88,7 @@ class HomePage extends StatelessWidget {
             enabled: false,
           ),
         ],
-      )
+      ),
     );
   }
 }

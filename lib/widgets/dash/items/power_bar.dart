@@ -16,7 +16,7 @@ class PowerBarGizmo extends Gizmo {
 
   @override
   Widget buildContent(BuildContext context) {
-    final Color outColor = Theme.of(context).colorScheme.onBackground;
+    final Color outColor = Theme.of(context).colorScheme.onSurface;
     const Color inColor = chargeColor;
 
     final power = Metric.watch<MetricFloat>(context, StandardMetric.hvBattPower.id);

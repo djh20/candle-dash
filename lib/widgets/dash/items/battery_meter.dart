@@ -45,7 +45,7 @@ class _BatteryMeterGizmoState extends NewGizmoState {
           value: (soc.value ?? 0) / 100,
           minHeight: 7,
           color: chargeColor,
-          backgroundColor: Theme.of(context).colorScheme.onBackground.withOpacity(0.2),
+          backgroundColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
         ),
       ],
     );

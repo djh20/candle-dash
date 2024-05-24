@@ -22,6 +22,7 @@ class AppSettings with ChangeNotifier {
   ThemeSetting? theme;
   List<KnownBluetoothDevice>? knownDevices;
   String? selectedDeviceId;
+  bool? experimentalMode;
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
@@ -33,6 +34,7 @@ class AppSettings with ChangeNotifier {
     ).toList();
 
     selectedDeviceId = _prefs.getString('selectedDeviceId');
+    experimentalMode = _prefs.getBool('experimentalMode') ?? false;
 
     isLoaded = true;
     notifyListeners();
@@ -42,17 +44,19 @@ class AppSettings with ChangeNotifier {
   Future<void> save() async {
     if (!isLoaded) return;
 
-    notifyListeners();
+    _prefs.setInt('theme', theme!.index);
     
     _prefs.setStringList('knownDevices', knownDevices!.map((d) => jsonEncode(d)).toList());
     selectedDeviceId != null ? _prefs.setString('selectedDeviceId', selectedDeviceId!) : _prefs.remove('selectedDeviceId');
- 
-    _prefs.setInt('theme', theme!.index);
+    
+    _prefs.setBool('experimentalMode', experimentalMode!);
+    
     debugPrint('Saved settings');
   }
 
   Future<void> update(Function(AppSettings s) callback) async {
     callback(this);
+    notifyListeners();
     await save();
   }
   
@@ -73,6 +77,9 @@ class AppSettings with ChangeNotifier {
   Future<void> removeKnownDevice(String id) async {
     if (knownDevices == null) return;
     
-    await update((_) => knownDevices!.removeWhere((d) => d.id == id));
+    await update((_) {
+      knownDevices!.removeWhere((d) => d.id == id);
+      if (selectedDeviceId == id) selectedDeviceId = null;
+    });
   }
 }

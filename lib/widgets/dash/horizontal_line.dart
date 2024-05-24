@@ -18,7 +18,7 @@ class HorizontalLine extends StatelessWidget {
         height: height,
         width: width,
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.onBackground.withOpacity(0.2),
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
         ),
       ),
     );
