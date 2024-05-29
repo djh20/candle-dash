@@ -1,4 +1,4 @@
-name: Flutter CI
+name: Flutter Build
 
 on:
   push:
@@ -17,16 +17,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
+          check-latest: true
+
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           flutter-version: 3.22.0
+          cache: true
       
       - name: Install Dependencies
         run: flutter pub get
 
-      - name: Build APK
+      - name: Build APKs
         run: flutter build apk --split-per-abi --build-name=${{ env.APP_VERSION }}
 
       - name: Upload Artifact
@@ -50,10 +59,10 @@ jobs:
       
       - name: Create Release Draft
         uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           draft: true
           generate_release_notes: true
           files: |
             ./dist/*
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
