@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'package:candle_dash/settings/app_settings.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 
@@ -61,9 +60,6 @@ class BluetoothManager with ChangeNotifier {
   late StreamSubscription<bool> _isScanningSubscription;
 
   StreamSubscription<BluetoothConnectionState>? _connectionStateSubscription;
-
-  /// Used during the connection process when scanning for the target device.
-  Completer<BluetoothDevice?>? _targetDeviceCompleter;
 
   BluetoothManager(AppSettings appSettings) :
     _appSettings = appSettings;
@@ -135,22 +131,8 @@ class BluetoothManager with ChangeNotifier {
 
     isConnecting = true;
 
-    BluetoothDevice? device = _getTargetDeviceFromScan();
-
-    if (device == null) {
-      _setStatusMessage('Searching for target device');
-      
-      _targetDeviceCompleter = Completer();
-      await startScan();
-      device = await _targetDeviceCompleter!.future;
-    }
-
-    if (device != null) {
-      await connectToDevice(device);
-    } else {
-      _setStatusMessage('Failed to find target device');
-      throw Exception(statusMessage);
-    }
+    final device = BluetoothDevice.fromId(_targetDeviceId!);
+    await connectToDevice(device);
   }
 
   Future<void> connectToDevice(BluetoothDevice device) async {
@@ -171,16 +153,21 @@ class BluetoothManager with ChangeNotifier {
       connectionPriorityRequest: ConnectionPriority.high,
     );
 
+    await Future.delayed(const Duration(milliseconds: 100));
+
     _setStatusMessage('Discovering services');
-    await device.discoverServices();
+    final services = await device.discoverServices();
+
+    debugPrint('Discovered ${services.length} service(s)');
+
+    for (final service in services) {
+      debugPrint('- ${service.uuid.str128}');
+    }
 
     statusMessage = 'MAC: ${device.remoteId.str}';
     isConnected = true;
     isConnecting = false;
     notifyListeners();
-
-    // Ensure bluetooth has initalized.
-    await Future.delayed(const Duration(milliseconds: 100));
 
     _resetCountdown();
   }
@@ -255,25 +242,11 @@ class BluetoothManager with ChangeNotifier {
   void _onScanStateUpdate(bool state) {
     isScanning = state;
     notifyListeners();
-
-    if (!isScanning) {
-      _targetDeviceCompleter?.complete(null);
-      _targetDeviceCompleter = null;
-    }
   }
 
   Future<void> _onScanResults(List<ScanResult> results) async {
     scanResults = results;
     notifyListeners();
-
-    if (_targetDeviceCompleter != null) {
-      final targetDevice = _getTargetDeviceFromScan();
-      if (targetDevice != null) {
-        _targetDeviceCompleter!.complete(targetDevice);
-        _targetDeviceCompleter = null;
-        await stopScan();
-      }
-    }
   }
 
   void _setStatusMessage(String message) {
@@ -281,11 +254,6 @@ class BluetoothManager with ChangeNotifier {
     debugPrint('Bluetooth: $statusMessage');
     notifyListeners();
   }
-
-  BluetoothDevice? _getTargetDeviceFromScan() =>
-    scanResults.firstWhereOrNull(
-      (r) => r.device.remoteId.str == _targetDeviceId,
-    )?.device;
 
   void _updateConnectionState(BluetoothConnectionState state) {
     if (_connectionState == state) return;
