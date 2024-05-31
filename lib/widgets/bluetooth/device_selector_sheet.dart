@@ -42,7 +42,7 @@ class DeviceSelectorSheet extends StatelessWidget {
               children: [
                 FilledButton.icon(
                   icon: const Icon(Icons.add),
-                  label: const Text('Add Scanner'),
+                  label: const Text('Add Device'),
                   onPressed: !deviceSelected ? () {
                     Navigator.pushNamed(context, '/bluetooth');
                     bluetoothManager.startScan();

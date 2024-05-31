@@ -22,7 +22,7 @@ class BluetoothPage extends StatelessWidget {
       onPopInvoked: (didPop) => didPop ? bluetoothManager.stopScan() : null,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Add Scanner'),
+          title: const Text('Add Device'),
         ),
         body: ListView.builder(
           padding: const EdgeInsets.only(left: 8, right: 8, bottom: 80),
@@ -32,8 +32,10 @@ class BluetoothPage extends StatelessWidget {
             return ScanResultTile(
               result: result,
               onAddIntent: () {
+                final id = result.device.remoteId.str;
                 Navigator.pop(context);
-                settings.addKnownDevice(result.device.remoteId.str, result.device.advName);
+                settings.addKnownDevice(id, result.device.advName);
+                settings.update((s) => s.selectedDeviceId = id);
               },
             );
           },

@@ -31,7 +31,7 @@ class ConnectionStatusTile extends StatelessWidget {
         ),
       ),
       subtitle: Text(
-        statusMessage ?? 'Please select a scanner',
+        statusMessage ?? 'Please select a device',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),

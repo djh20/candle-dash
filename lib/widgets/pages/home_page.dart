@@ -21,7 +21,7 @@ class HomePage extends StatelessWidget {
         title: settings.selectedDevice != null ? 
           Text(settings.selectedDevice!.name) :
           const Text(
-            'No Scanner Selected',
+            'No Device Selected',
             style: TextStyle(fontStyle: FontStyle.italic),
           ),
         actions: [
@@ -75,18 +75,18 @@ class HomePage extends StatelessWidget {
             onTap: () => Navigator.pushNamed(context, '/dash'),
           ),
           ListTile(
-            title: const Text('App Settings'),
-            leading: const Icon(Icons.phone_android),
+            title: const Text('Settings'), // 'App Settings'
+            leading: const Icon(Icons.settings), // Icons.phone_android
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () => Navigator.pushNamed(context, '/app_settings'),
           ),
-          ListTile(
-            title: const Text('Scanner Settings'),
-            leading: const Icon(Icons.memory),
-            trailing: const Icon(Icons.arrow_forward_ios),
-            onTap: () {},
-            enabled: false,
-          ),
+          // ListTile(
+          //   title: const Text('Scanner Settings'),
+          //   leading: const Icon(Icons.memory),
+          //   trailing: const Icon(Icons.arrow_forward_ios),
+          //   onTap: () {},
+          //   enabled: false,
+          // ),
         ],
       ),
     );

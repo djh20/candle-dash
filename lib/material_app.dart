@@ -46,7 +46,7 @@ class MyMaterialApp extends StatelessWidget {
         '/bluetooth': (context) => const BluetoothPage(),
         '/dash': (context) => const DashPage(),
         '/app_settings': (context) => const AppSettingsPage(),
-        '/scanner_settings': (context) => const SizedBox(),
+        '/device_settings': (context) => const SizedBox(),
       },
     );
   }

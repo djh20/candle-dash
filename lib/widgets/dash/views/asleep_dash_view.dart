@@ -35,7 +35,7 @@ class AsleepDashView extends StatelessWidget {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     HorizontalLine(),
-                    Text('No scanner selected'),
+                    Text('No device selected'),
                   ],
                 ),
               ),
