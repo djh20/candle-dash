@@ -1,11 +1,10 @@
+import 'package:candle_dash/ota/app_updater.dart';
 import 'package:candle_dash/settings/app_settings.dart';
-import 'package:candle_dash/update_manager.dart';
 import 'package:candle_dash/widgets/bluetooth/device_selector_sheet.dart';
 import 'package:candle_dash/widgets/home/connection_status_tile.dart';
-import 'package:candle_dash/widgets/home/update_tile.dart';
+import 'package:candle_dash/widgets/home/updater_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:version/version.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -13,7 +12,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<AppSettings>();
-    final updateManager = context.watch<UpdateManager>();
+    final appUpdater = context.watch<AppUpdater>();
 
     return Scaffold(
       appBar: AppBar(
@@ -41,29 +40,15 @@ class HomePage extends StatelessWidget {
           const ConnectionStatusTile(),
           const Divider(),
 
-          UpdateTile(
+          UpdaterTile(
             name: 'App',
-            availability: updateManager.appUpdateAvailability,
-            currentVersion: updateManager.currentAppVersion,
-            latestVersion: updateManager.latestAppVersion,
-            onUpdatePressed: () {},
+            updater: appUpdater,
           ),
-
-          // UpdateTile(
-          //   name: 'Firmware',
-          //   availability: UpdateAvailability.unknown,
-          //   // currentVersion: Version.parse('0.0.1-b4'),
-          //   // latestVersion: Version.parse('0.0.2'),
-          //   onUpdatePressed: () {},
-          //   enabled: false,
-          // ),
 
           FilledButton.tonalIcon(
             icon: const Icon(Icons.update), 
             label: const Text('Check for Updates'),
-            onPressed:
-              !updateManager.isCheckingForUpdates ? 
-              () => updateManager.checkForUpdates() : null,
+            onPressed: () => appUpdater.checkForUpdates(),
           ),
 
           const Divider(),

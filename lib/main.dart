@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:candle_dash/bluetooth/bluetooth_manager.dart';
 import 'package:candle_dash/dash/dash_manager.dart';
 import 'package:candle_dash/material_app.dart';
+import 'package:candle_dash/ota/app_updater.dart';
 import 'package:candle_dash/settings/app_settings.dart';
-import 'package:candle_dash/update_manager.dart';
 import 'package:candle_dash/utils.dart';
 import 'package:light_sensor/light_sensor.dart';
 import 'package:candle_dash/vehicle/vehicle.dart';
@@ -31,7 +31,7 @@ class _MyAppState extends State<MyApp> {
   final _appSettings = AppSettings();
   final _dashManager = DashManager();
   late final BluetoothManager _bluetoothManager;
-  late final UpdateManager _updateManager;
+  late final AppUpdater _appUpdater;
   Vehicle? _vehicle;
 
   late StreamSubscription<BluetoothConnectionState?> _connectionStateStreamSubscription;
@@ -47,29 +47,12 @@ class _MyAppState extends State<MyApp> {
     _bluetoothManager = BluetoothManager(_appSettings);
     _bluetoothManager.addListener(_onBluetoothEvent);
 
-    _updateManager = UpdateManager(_appSettings, _bluetoothManager);
+    _appUpdater = AppUpdater(_appSettings);
 
     _appSettings.init().then((_) {
       _bluetoothManager.init();
-      _updateManager.init();
+      _appUpdater.init();
     });
-
-    // _appSettings.init().then((_) => _bluetoothManager.targetDeviceId = _appSettings.selectedDeviceId);
-
-    // _connectionStateStreamSubscription = _bluetoothManager.globalConnectionStateStream.listen((state) async {
-    //   if (state == BluetoothConnectionState.connected && _bluetoothManager.currentDevice != null) {
-    //     setState(() => _vehicle = Vehicle());
-    //     try {
-    //       await _vehicle!.init(_bluetoothManager.currentDevice!).onError((error, stackTrace) => null);
-    //     } on PlatformException {
-    //       debugPrint('Vehicle init failed!');
-    //     }
-
-    //   } else if (state == BluetoothConnectionState.disconnected) {
-    //     _vehicle?.dispose();
-    //     setState(() => _vehicle = null);
-    //   }
-    // });
 
     _screen = Screen();
     try {
@@ -100,7 +83,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider.value(value: _appSettings),
         ChangeNotifierProvider.value(value: _dashManager),
         ChangeNotifierProvider.value(value: _bluetoothManager),
-        ChangeNotifierProvider.value(value: _updateManager),
+        ChangeNotifierProvider.value(value: _appUpdater),
         ChangeNotifierProvider.value(value: _vehicle),
       ],
       child: MyMaterialApp(
