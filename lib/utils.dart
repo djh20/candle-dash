@@ -44,6 +44,13 @@ List<int> int32ToIntList(int? int32, {Endian endian = Endian.big}) {
   return byteData.buffer.asUint8List().toList();
 }
 
+List<int> uint32ToIntList(int? uint32, {Endian endian = Endian.big}) {
+  if (uint32 == null) return const [];
+  ByteData byteData = ByteData(4);
+  byteData.setUint32(0, uint32, endian);
+  return byteData.buffer.asUint8List().toList();
+}
+
 Color lerpColor(double progress, {
   required Color from,
   required Color to,

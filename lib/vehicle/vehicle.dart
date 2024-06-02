@@ -56,10 +56,10 @@ class Vehicle with ChangeNotifier {
     );
 
     final vehicleIdCharacteristic = configService.characteristics.firstWhere(
-      (c) => c.uuid == Guid.fromString(BluetoothUuids.configVehicleId),
+      (c) => c.uuid == Guid.fromString(BluetoothUuids.configVehicleIdChar),
     );
 
-    id = intListToInt16(await vehicleIdCharacteristic.read());
+    id = intListToUint16(await vehicleIdCharacteristic.read());
     debugPrint('Vehicle ID: $id');
     _setRepresentation();
 

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:github/github.dart';
 import 'package:open_file_plus/open_file_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:version/version.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 
@@ -44,14 +45,18 @@ class AppUpdater extends Updater {
     debugPrint('Preferred ABI: $_preferredAbi');
     
     final compatibleAsset = ctx.release.assets?.firstWhereOrNull(
-      (a) => a.browserDownloadUrl?.contains('-$_preferredAbi-') == true,
+      (a) => a.name?.contains('-$_preferredAbi-') == true,
     );
 
     final url = compatibleAsset?.browserDownloadUrl;
 
     if (url != null) {
       debugPrint('Compatible APK: ${compatibleAsset?.browserDownloadUrl}');
-      _apkFilePath = await downloadFile(url, onProgress: ctx.setProgress);
+      _apkFilePath = await downloadFile(
+        url, 
+        onProgress: ctx.setProgress, 
+        externalStorage: true,
+      );
     }
   }
 
@@ -59,6 +64,12 @@ class AppUpdater extends Updater {
     if (_apkFilePath == null) return;
 
     debugPrint('Attempting to install APK: $_apkFilePath');
+
+    final permissionStatus = await Permission.requestInstallPackages.request();
+    if (!permissionStatus.isGranted) {
+      throw Exception('Install packages permission not granted');
+    }
+
     await OpenFile.open(_apkFilePath!);
     
     // int? statusCode = await AndroidPackageInstaller.installApk(apkFilePath: _apkFilePath!);

@@ -120,11 +120,10 @@ abstract class Updater with ChangeNotifier {
     {
       CancelToken? cancelToken, 
       Function(double progress)? onProgress,
+      bool externalStorage = false,
     }) async {
 
     PermissionStatus permissionStatus;
-
-    debugPrint('SDK: $_sdkVersion');
 
     if (_sdkVersion < 33) {
       permissionStatus = await Permission.storage.request();
@@ -133,19 +132,18 @@ abstract class Updater with ChangeNotifier {
       }
     }
 
-    if (_sdkVersion > 30) {
+    if (externalStorage && _sdkVersion > 30) {
       permissionStatus = await Permission.manageExternalStorage.request();
       if (!permissionStatus.isGranted) {
         throw Exception('Manage external storage permission not granted');
       }
     }
-    
-    permissionStatus = await Permission.requestInstallPackages.request();
-    if (!permissionStatus.isGranted) {
-      throw Exception('Install packages permission not granted');
-    }
 
-    final Directory? dir = await getExternalStorageDirectory();
+    final Directory? dir =
+      externalStorage ? 
+        await getExternalStorageDirectory() :
+        await getApplicationCacheDirectory();
+    
     if (dir == null) throw Exception('Failed to find directory');
     
     final String fileName = url.split('/').last;

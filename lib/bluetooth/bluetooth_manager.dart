@@ -19,12 +19,6 @@ class BluetoothManager with ChangeNotifier {
   /// An informative message describing the current task.
   String? statusMessage;
 
-  /// The connection state according to FlutterBluePlus. 
-  /// 
-  /// Note: This is **not** indicative of whether initialization procedures have completed
-  /// (e.g. requesting connecting priority, discovering services).
-  BluetoothConnectionState _connectionState = BluetoothConnectionState.disconnected;
-
   /// The MAC address of the target device (as specified in app settings).
   String? _targetDeviceId;
 
@@ -139,7 +133,7 @@ class BluetoothManager with ChangeNotifier {
     if (!isEnabled) return;
     debugPrint('Connecting to ${device.advName} (${device.remoteId.str})');
     
-    _connectionStateSubscription = device.connectionState.listen(_updateConnectionState);
+    _connectionStateSubscription = device.connectionState.listen(_onConnectionStateUpdate);
     isConnecting = true;
     currentDevice = device;
     notifyListeners();
@@ -173,17 +167,8 @@ class BluetoothManager with ChangeNotifier {
   }
 
   Future<void> disconnect() async {
-    isConnecting = false;
-    isConnected = false;
-    _updateConnectionState(BluetoothConnectionState.disconnected);
-    scanResults.clear();
-    statusMessage = null;
-    notifyListeners();
-    
+    _onConnectionStateUpdate(BluetoothConnectionState.disconnected);
     await currentDevice?.disconnect(queue: false);
-    _connectionStateSubscription?.cancel();
-    currentDevice = null;
-    notifyListeners();
   }
 
   Future<void> enable() async {
@@ -255,14 +240,15 @@ class BluetoothManager with ChangeNotifier {
     notifyListeners();
   }
 
-  void _updateConnectionState(BluetoothConnectionState state) {
-    if (_connectionState == state) return;
-
+  void _onConnectionStateUpdate(BluetoothConnectionState state) {
     if (state == BluetoothConnectionState.disconnected) {
+      isConnecting = false;
       isConnected = false;
+      currentDevice = null;
+      statusMessage = null;
+      _connectionStateSubscription?.cancel();
+      
       notifyListeners();
     }
-
-    _connectionState = state;
   }
 }

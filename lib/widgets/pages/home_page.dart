@@ -1,4 +1,5 @@
 import 'package:candle_dash/ota/app_updater.dart';
+import 'package:candle_dash/ota/firmware_updater.dart';
 import 'package:candle_dash/settings/app_settings.dart';
 import 'package:candle_dash/widgets/bluetooth/device_selector_sheet.dart';
 import 'package:candle_dash/widgets/home/connection_status_tile.dart';
@@ -13,6 +14,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final settings = context.watch<AppSettings>();
     final appUpdater = context.watch<AppUpdater>();
+    final firmwareUpdater = context.watch<FirmwareUpdater?>();
 
     return Scaffold(
       appBar: AppBar(
@@ -45,10 +47,18 @@ class HomePage extends StatelessWidget {
             updater: appUpdater,
           ),
 
+          UpdaterTile(
+            name: 'Firmware',
+            updater: firmwareUpdater,
+          ),
+
           FilledButton.tonalIcon(
             icon: const Icon(Icons.update), 
             label: const Text('Check for Updates'),
-            onPressed: () => appUpdater.checkForUpdates(),
+            onPressed: () {
+              appUpdater.checkForUpdates();
+              firmwareUpdater?.checkForUpdates();
+            },
           ),
 
           const Divider(),

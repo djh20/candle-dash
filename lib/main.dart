@@ -4,6 +4,7 @@ import 'package:candle_dash/bluetooth/bluetooth_manager.dart';
 import 'package:candle_dash/dash/dash_manager.dart';
 import 'package:candle_dash/material_app.dart';
 import 'package:candle_dash/ota/app_updater.dart';
+import 'package:candle_dash/ota/firmware_updater.dart';
 import 'package:candle_dash/settings/app_settings.dart';
 import 'package:candle_dash/utils.dart';
 import 'package:light_sensor/light_sensor.dart';
@@ -32,9 +33,9 @@ class _MyAppState extends State<MyApp> {
   final _dashManager = DashManager();
   late final BluetoothManager _bluetoothManager;
   late final AppUpdater _appUpdater;
+  FirmwareUpdater? _firmwareUpdater;
   Vehicle? _vehicle;
 
-  late StreamSubscription<BluetoothConnectionState?> _connectionStateStreamSubscription;
   late StreamSubscription<int> _lightSensorStreamSubscription;
   final List<int> _lightSensorValues = [];
   late final Timer _themeUpdateTimer;
@@ -68,7 +69,6 @@ class _MyAppState extends State<MyApp> {
   @override
   void dispose() {
     _bluetoothManager.removeListener(_onBluetoothEvent);
-    _connectionStateStreamSubscription.cancel();
     _bluetoothManager.dispose();
     _screenSubscription?.cancel();
     _lightSensorStreamSubscription.cancel();
@@ -84,6 +84,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider.value(value: _dashManager),
         ChangeNotifierProvider.value(value: _bluetoothManager),
         ChangeNotifierProvider.value(value: _appUpdater),
+        ChangeNotifierProvider.value(value: _firmwareUpdater),
         ChangeNotifierProvider.value(value: _vehicle),
       ],
       child: MyMaterialApp(
@@ -103,18 +104,28 @@ class _MyAppState extends State<MyApp> {
 
   void _onBluetoothEvent() {
     if (_bluetoothManager.isConnected && _bluetoothManager.currentDevice != null) {
-      _createVehicle(_bluetoothManager.currentDevice!);
+      final device = _bluetoothManager.currentDevice!;
+
+      if (_vehicle == null) {
+        setState(() => _vehicle = Vehicle());
+        _vehicle!.init(device);
+      }
+
+      if (_firmwareUpdater == null) {
+        setState(() => _firmwareUpdater = FirmwareUpdater(_appSettings, device));
+        _firmwareUpdater!.init();
+      }
+      
     } else {
-      _vehicle?.dispose();
-      setState(() => _vehicle = null);
+      if (_vehicle != null) {
+        _vehicle?.dispose();
+        setState(() => _vehicle = null);
+      }
+
+      if (_firmwareUpdater != null) {
+        setState(() => _firmwareUpdater = null);
+      }
     }
-  }
-
-  Future<void> _createVehicle(BluetoothDevice device) async {
-    if (_vehicle != null) return;
-    setState(() => _vehicle = Vehicle());
-
-    await _vehicle!.init(device).catchError((err) => debugPrint(err.toString()));
   }
 
   void _onLightSensorUpdate(int lux) {
