@@ -150,13 +150,16 @@ class FirmwareUpdater extends Updater {
         debugPrint('$pos / $binSize');
       }
 
-      await binFileAccess.close();
-      await _write([0x02], otaCommandChar);
-      await _bluetoothDevice.disconnect(queue: false);
+      ctx.setProgress(1);
 
-    } catch (err) {
-      debugPrint(err.toString());
+      await binFileAccess.close();
+      await _bluetoothDevice.clearGattCache();
+      await _write([0x02], otaCommandChar);
+      await _bluetoothDevice.disconnect();
+      
+    } catch (_) {
       await otaCommandChar.setNotifyValue(false, timeout: 2);
+      rethrow;
     }
   }
 

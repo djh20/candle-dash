@@ -45,7 +45,7 @@ class AppUpdater extends Updater {
     debugPrint('Preferred ABI: $_preferredAbi');
     
     final compatibleAsset = ctx.release.assets?.firstWhereOrNull(
-      (a) => a.name?.contains('-$_preferredAbi-') == true,
+      (a) => a.name?.contains(_preferredAbi) == true,
     );
 
     final url = compatibleAsset?.browserDownloadUrl;

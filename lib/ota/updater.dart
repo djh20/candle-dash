@@ -8,6 +8,7 @@ import 'package:github/github.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:version/version.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 enum UpdateAvailability {
   unknown,
@@ -57,7 +58,10 @@ abstract class Updater with ChangeNotifier {
     isUpdating = true;
     notifyListeners();
 
+    // TODO: Implement a better wakelock management system because the dash also uses it.
+    await WakelockPlus.enable();
     await _runTasks().catchError((err) => debugPrint(err.toString()));
+    await WakelockPlus.disable();
 
     isUpdating = false;
     currentTask = null;

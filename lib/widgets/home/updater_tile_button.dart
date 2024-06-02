@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 
 class UpdaterTileButton extends StatelessWidget {
   final Updater? updater;
+  final bool canInstall;
 
   const UpdaterTileButton({
     super.key,
     required this.updater,
+    required this.canInstall,
   });
 
   @override
@@ -24,7 +26,7 @@ class UpdaterTileButton extends StatelessWidget {
 
         } else if (availability == UpdateAvailability.newVersionAvailable) {
           return TextButton(
-            onPressed: () => updater!.performUpdate(),
+            onPressed: canInstall ? () => updater!.performUpdate() : null,
             child: const Text('Install'),
           );
         }

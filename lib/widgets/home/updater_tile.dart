@@ -9,12 +9,14 @@ class UpdaterTile extends StatelessWidget {
   final String name;
   final Updater? updater;
   final IconData disabledIcon;
+  final bool canInstall;
 
   const UpdaterTile({
     super.key,
     required this.name,
     required this.updater,
     this.disabledIcon = Icons.bluetooth_disabled,
+    this.canInstall = true,
   });
 
   @override
@@ -32,6 +34,7 @@ class UpdaterTile extends StatelessWidget {
       ),
       trailing: UpdaterTileButton(
         updater: updater,
+        canInstall: canInstall,
       ),
       enabled: updater != null,
     );

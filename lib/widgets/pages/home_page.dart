@@ -45,11 +45,13 @@ class HomePage extends StatelessWidget {
           UpdaterTile(
             name: 'App',
             updater: appUpdater,
+            canInstall: firmwareUpdater?.isUpdating != true,
           ),
 
           UpdaterTile(
             name: 'Firmware',
             updater: firmwareUpdater,
+            canInstall: appUpdater.isUpdating != true,
           ),
 
           FilledButton.tonalIcon(

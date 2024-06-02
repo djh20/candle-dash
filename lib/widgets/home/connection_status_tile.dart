@@ -1,4 +1,5 @@
 import 'package:candle_dash/bluetooth/bluetooth_manager.dart';
+import 'package:candle_dash/settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -7,6 +8,9 @@ class ConnectionStatusTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final deviceSelected = 
+      context.select((AppSettings s) => s.selectedDeviceId != null);
+
     final statusMessage = context.select((BluetoothManager bm) => bm.statusMessage);
 
     final isConnected = context.select((BluetoothManager bm) => bm.isConnected);
@@ -31,7 +35,7 @@ class ConnectionStatusTile extends StatelessWidget {
         ),
       ),
       subtitle: Text(
-        statusMessage ?? 'Please select a device',
+        deviceSelected ? (statusMessage ?? '...') : 'Please select a device',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
       ),
