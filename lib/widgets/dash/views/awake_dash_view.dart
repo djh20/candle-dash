@@ -49,7 +49,6 @@ class AwakeDashView extends StatelessWidget {
         ),
         const DashColumn(
           flex: 8,
-          overlay: BirdseyeGizmo(overlay: true),
           items: [
             ClockGizmo(),
             BatteryStatsGizmo(),
