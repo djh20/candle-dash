@@ -139,6 +139,7 @@ class BluetoothManager with ChangeNotifier {
     notifyListeners();
 
     _setStatusMessage('Attempting to contact device');
+
     await device.connect(timeout: const Duration(seconds: 5));
     debugPrint('Connected to ${device.advName} (${device.remoteId.str})');
 
@@ -167,8 +168,8 @@ class BluetoothManager with ChangeNotifier {
   }
 
   Future<void> disconnect() async {
-    _onConnectionStateUpdate(BluetoothConnectionState.disconnected);
     await currentDevice?.disconnect(queue: false);
+    _resetConnection();
   }
 
   Future<void> enable() async {
@@ -180,12 +181,14 @@ class BluetoothManager with ChangeNotifier {
     isEnabled = false;
     await stopScan();
     await disconnect();
+    _setStatusMessage('Bluetooth disabled');
   }
 
   Future<void> _onSettingsUpdate() async {
     if (_targetDeviceId != _appSettings.selectedDeviceId) {
       _targetDeviceId = _appSettings.selectedDeviceId;
       _resetCountdown();
+      _setStatusMessage('Switching to new device');
       await disconnect();
     }
   }
@@ -196,11 +199,6 @@ class BluetoothManager with ChangeNotifier {
       isConnecting || isConnected
     ) return;
 
-    if (_countdown > 0) {
-      _countdown--;
-      _setStatusMessage('Retrying in ${_countdown}s');
-    }
-
     if (_countdown <= 0) {
       await connectToTargetDevice().catchError((err) async {
         _setStatusMessage('Failed to connect');
@@ -208,6 +206,9 @@ class BluetoothManager with ChangeNotifier {
         _increaseCountdown();
         await disconnect();
       });
+    } else {
+      _setStatusMessage('Retrying in ${_countdown}s');
+      _countdown--;
     }
   }
 
@@ -217,6 +218,14 @@ class BluetoothManager with ChangeNotifier {
       _minCountdownDuration,
     );
     _countdown = _countdownDuration;
+  }
+
+  void _resetConnection() {
+    isConnecting = false;
+    isConnected = false;
+    currentDevice = null;
+    _connectionStateSubscription?.cancel();
+    notifyListeners();
   }
 
   void _resetCountdown() {
@@ -241,14 +250,9 @@ class BluetoothManager with ChangeNotifier {
   }
 
   void _onConnectionStateUpdate(BluetoothConnectionState state) {
-    if (state == BluetoothConnectionState.disconnected) {
-      isConnecting = false;
-      isConnected = false;
-      currentDevice = null;
-      statusMessage = null;
-      _connectionStateSubscription?.cancel();
-      
-      notifyListeners();
+    if (state == BluetoothConnectionState.disconnected && isConnected) {
+      _setStatusMessage('Lost connection unexpectedly');
+      _resetConnection();
     }
   }
 }

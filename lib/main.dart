@@ -10,7 +10,6 @@ import 'package:candle_dash/utils.dart';
 import 'package:light_sensor/light_sensor.dart';
 import 'package:candle_dash/vehicle/vehicle.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:screen_state/screen_state.dart';
 
