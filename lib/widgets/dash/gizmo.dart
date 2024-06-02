@@ -5,14 +5,12 @@ abstract class Gizmo extends StatelessWidget {
     super.key,
     required this.name, 
     this.description,
-    required this.height,
     this.padding = const EdgeInsets.only(top: 8, left: 10, right: 10),
     this.overlay = false,
   });
 
   final String name;
   final String? description;
-  final double height;
   final EdgeInsets padding;
   final bool overlay;
 
@@ -33,22 +31,20 @@ abstract class Gizmo extends StatelessWidget {
 
   Widget get incompatible {
     return Container(
-      height: height,
+      height: 40,
       decoration: BoxDecoration(
         color: Colors.red.withOpacity(0.2),
         border: Border.all(
           color: Colors.red,
         ),
       ),
-      child: (height >= 30) ? 
-        const Center(
-          child: Icon(
-            Icons.error_outline,
-            color: Colors.red,
-            size: 24,
-          ),
-        )
-        : null,
+      child: const Center(
+        child: Icon(
+          Icons.error_outline,
+          color: Colors.red,
+          size: 24,
+        ),
+      ),
     );
   }
 

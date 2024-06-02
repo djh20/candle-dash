@@ -11,7 +11,6 @@ const double deadZone = 1;
 class PowerBarGizmo extends Gizmo {
   const PowerBarGizmo({super.key}) : super(
     name: 'Power Bar',
-    height: 7,
   );
 
   @override

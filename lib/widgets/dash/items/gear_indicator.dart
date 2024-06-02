@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 class GearIndicatorGizmo extends Gizmo {
   const GearIndicatorGizmo({super.key}) : super(
     name: 'Gear Indicator',
-    height: 32,
   );
 
   @override

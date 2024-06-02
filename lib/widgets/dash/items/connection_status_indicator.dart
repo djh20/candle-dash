@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 class ConnectionStatusIndicatorGizmo extends Gizmo {
   const ConnectionStatusIndicatorGizmo({super.key}) : super(
     name: 'Connection Status Indicator',
-    height: 35,
   );
 
   @override

@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 class ClockGizmo extends Gizmo {
   const ClockGizmo({super.key}) : super(
     name: 'Clock',
-    height: 35,
   );
 
   @override

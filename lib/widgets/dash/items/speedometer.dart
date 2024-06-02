@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 class SpeedometerGizmo extends Gizmo {
   const SpeedometerGizmo({super.key}) : super(
     name: 'Speedometer',
-    height: 135,
   );
 
   @override
@@ -21,8 +20,11 @@ class SpeedometerGizmo extends Gizmo {
 
     final bool parked = (gear?.value == null || gear?.value == VehicleGear.park.index);
     
-    return CustomAnimatedSwitcher(
-      child: parked ? const _Sideprofile() : _Speedo(speed: speed.value ?? 0),
+    return SizedBox(
+      height: 135,
+      child: CustomAnimatedSwitcher(
+        child: parked ? const _Sideprofile() : _Speedo(speed: speed.value ?? 0),
+      ),
     );
   }
 }
