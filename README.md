@@ -1,4 +1,6 @@
 ﻿# Candle Dash
+[![Flutter Build](https://github.com/djh20/candle-dash/actions/workflows/flutter.yml/badge.svg)](https://github.com/djh20/candle-dash/actions/workflows/flutter.yml)
+
 A companion app for [Candle](https://github.com/djh20/candle) that is intended to be used as a custom dashboard display.
 
 Currently, the only supported vehicle is the Gen 1 Nissan Leaf (2011-2017).
