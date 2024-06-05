@@ -25,6 +25,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  ThemeMode? suggestedThemeMode;
+
   late Screen _screen;
   StreamSubscription<ScreenStateEvent>? _screenSubscription;
 
@@ -38,8 +40,6 @@ class _MyAppState extends State<MyApp> {
   late StreamSubscription<int> _lightSensorStreamSubscription;
   final List<int> _lightSensorValues = [];
   late final Timer _themeUpdateTimer;
-
-  ThemeMode _suggestedThemeMode = ThemeMode.light;
 
   @override
   void initState() {
@@ -87,7 +87,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider.value(value: _vehicle),
       ],
       child: MyMaterialApp(
-        suggestedThemeMode: _suggestedThemeMode,
+        suggestedThemeMode: suggestedThemeMode ?? ThemeMode.light,
       ),
     );
   }
@@ -129,6 +129,7 @@ class _MyAppState extends State<MyApp> {
 
   void _onLightSensorUpdate(int lux) {
     _lightSensorValues.add(lux);
+    if (suggestedThemeMode == null) _updateSuggestedThemeMode();
   }
 
   void _updateSuggestedThemeMode() {
@@ -144,7 +145,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void _setSuggestedThemeMode(ThemeMode mode) {
-    if (mode == _suggestedThemeMode) return;
-    setState(() => _suggestedThemeMode = mode);
+    if (mode == suggestedThemeMode) return;
+    setState(() => suggestedThemeMode = mode);
   }
 }
