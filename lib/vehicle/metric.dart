@@ -29,11 +29,7 @@ enum StandardMetric {
   quickCharges(0x90FB),
   slowCharges(0x18AB),
   tripDistance(0x912F),
-  steeringAngle(0x35F8),
-  flTirePressure(0x858D),
-  frTirePressure(0x5193),
-  rlTirePressure(0xFA16),
-  rrTirePressure(0x842D);
+  steeringAngle(0x35F8);
 
   const StandardMetric(this.id);
   final int id;
