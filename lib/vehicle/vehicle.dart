@@ -3,10 +3,8 @@ import 'dart:async';
 import 'package:candle_dash/bluetooth/bluetooth_uuids.dart';
 import 'package:candle_dash/utils.dart';
 import 'package:candle_dash/vehicle/metric.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:geolocator/geolocator.dart';
 
 enum VehicleGear {
   park('P'),
@@ -40,9 +38,6 @@ class Vehicle with ChangeNotifier {
   static const List<VehicleRepresentation> representations = [];
 
   final List<StreamSubscription> _streams = [];
-  StreamSubscription<Position>? _gpsPositionSubscription;
-  Position? _gpsPosition;
-  bool _disposed = false;
 
   Future<void> init(BluetoothDevice device) async {
     if (!device.isConnected) return;
@@ -79,13 +74,6 @@ class Vehicle with ChangeNotifier {
         }
         characteristicMetrics.add(metric);
         registerMetric(metric);
-        // _streams.add(
-        //   metric.publishStream.listen((data) {
-        //     if (metric.descriptor == null) return;
-        //     final fullData = metric.descriptor!.sublist(0, 2) + data;
-        //     commandCharacteristic.write(fullData);
-        //   }),
-        // );
       }
       
       var characteristicData = await characteristic.read();
@@ -98,14 +86,10 @@ class Vehicle with ChangeNotifier {
 
       await characteristic.setNotifyValue(true, timeout: 2);
     }
-
-    if (!_disposed) await _initGps();
   }
 
   @override
   void dispose() {
-    _disposed = true;
-    _gpsPositionSubscription?.cancel();
     for (var stream in _streams) {
       stream.cancel();
     }
@@ -131,60 +115,6 @@ class Vehicle with ChangeNotifier {
   }
 
   void registerMetrics(List<Metric> newMetrics) => newMetrics.forEach(registerMetric);
-
-  Future<void> _initGps() async {
-    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      return Future.error('Location services are disabled.');
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        return Future.error('Location permissions are denied');
-      }
-    }
-
-    if (permission == LocationPermission.deniedForever) {
-      return Future.error('Location permissions are permanently denied, we cannot request permissions.');
-    }
-
-    const LocationSettings locationSettings = LocationSettings(
-      accuracy: LocationAccuracy.high,
-      distanceFilter: 30,
-    );
-    
-    _gpsPositionSubscription = 
-      Geolocator.getPositionStream(locationSettings: locationSettings).listen(_onGpsPositionUpdate);
-  }
-
-  void _onGpsPositionUpdate(Position? newPosition) {
-    debugPrint(newPosition.toString());
-
-    final tripDistance = 
-      metrics.firstWhereOrNull((m) => m.id == StandardMetric.tripDistance.id) as MetricFloat?;
-
-    final gear = 
-      metrics.firstWhereOrNull((m) => m.id == StandardMetric.gear.id) as MetricInt?;
-
-    final bool parked = (gear?.value == null || gear?.value == VehicleGear.park.index);
-    
-    if (_gpsPosition != null && tripDistance != null && gear != null) {
-      final distanceKm = Geolocator.distanceBetween(
-        _gpsPosition!.latitude,
-        _gpsPosition!.longitude,
-        newPosition!.latitude,
-        newPosition.longitude,
-      ) / 1000;
-
-      if (distanceKm <= 100 && !parked) {
-        tripDistance.setValue((tripDistance.value ?? 0.0) + distanceKm, publish: true);
-      }
-    }
-
-    _gpsPosition = newPosition; 
-  }
 
   void _setRepresentation() {
     representation = representations.firstWhere((r) => r.vehicleId == id, orElse: () => defaultRepresentation);

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math';
 import 'package:candle_dash/utils.dart';
 import 'package:candle_dash/vehicle/vehicle.dart';
@@ -10,6 +9,7 @@ enum StandardMetric {
   awake(0x8B51),
   gear(0x2C96),
   speed(0x75AE),
+  steeringAngle(0x35F8),
   fanSpeed(0x3419),
   range(0xC3E8),
   turnSignal(0x13CA),
@@ -25,11 +25,10 @@ enum StandardMetric {
   hvBattTemperature(0x87C9),
   chargeStatus(0x2DA6),
   remainingChargeTime(0x31D1),
-  rangeLastCharge(0x5E38),
   quickCharges(0x90FB),
   slowCharges(0x18AB),
   tripDistance(0x912F),
-  steeringAngle(0x35F8);
+  tripEfficiency(0x85D0);
 
   const StandardMetric(this.id);
   final int id;
@@ -73,9 +72,6 @@ abstract class Metric with ChangeNotifier {
   String? get displayValue;
   List<int>? descriptor;
 
-  final _publishStreamController = StreamController<List<int>>.broadcast();
-  Stream<List<int>> get publishStream => _publishStreamController.stream;
-
   factory Metric.fromDescriptor(List<int> descriptor) {
     final id = intListToUint16(descriptor.sublist(0, 2));
 
@@ -100,12 +96,6 @@ abstract class Metric with ChangeNotifier {
     } else {
       throw Error();
     }
-  }
-
-  @override
-  void dispose() {
-    _publishStreamController.close();
-    super.dispose();
   }
 
   static T? watch<T extends Metric>(BuildContext context, int metricId) {
@@ -138,13 +128,8 @@ class MetricInt extends Metric {
   @override
   String? get displayValue => value?.toString();
 
-  Future<void> setValue(int? newValue, {bool publish = false}) async {
+  void setValue(int? newValue) {
     if (value == newValue) return;
-
-    if (publish) {
-      _publishStreamController.add(int32ToIntList(newValue));
-      return;
-    }
 
     value = newValue;
     notifyListeners();
@@ -152,7 +137,8 @@ class MetricInt extends Metric {
 
   @override
   void setValueFromRawData(List<int> data) {
-    if (data[0] == 0) return;
+    if (data[0] == 0) return setValue(null);
+    
     setValue(intListToInt32(data.sublist(1, 5)));
   }
 }
@@ -174,16 +160,8 @@ class MetricFloat extends Metric {
   @override
   String? get displayValue => value?.toStringAsFixed(1);
 
-  Future<void> setValue(double? newValue, {bool publish = false}) async {
+  void setValue(double? newValue) {
     if (value == newValue) return;
-
-    if (publish) {
-      if (newValue != null) {
-        final convertedValue = (newValue * pow(10, precision)).toInt();
-        _publishStreamController.add(int32ToIntList(convertedValue));
-      }
-      return;
-    }
 
     value = newValue;
     notifyListeners();
@@ -191,7 +169,8 @@ class MetricFloat extends Metric {
  
   @override
   void setValueFromRawData(List<int> data) {
-    if (data[0] == 0) return;
+    if (data[0] == 0) return setValue(null);
+
     final intValue = intListToInt32(data.sublist(1, 5));
     setValue(intValue / pow(10, precision));
   }

@@ -7,7 +7,7 @@ class DummyVehicle extends Vehicle {
     registerMetrics([
       MetricInt(id: StandardMetric.awake.id, initialValue: 1),
       MetricInt(id: StandardMetric.gear.id, initialValue: VehicleGear.drive.index),
-      MetricFloat(id: StandardMetric.speed.id, initialValue: 5, precision: 2, unit: Unit.kilometersPerHour),
+      MetricFloat(id: StandardMetric.speed.id, initialValue: 24, precision: 2, unit: Unit.kilometersPerHour),
       MetricFloat(id: StandardMetric.soc.id, initialValue: 82.73, precision: 2, unit: Unit.percent),
       MetricInt(id: StandardMetric.range.id, initialValue: 142, unit: Unit.kilometers),
       MetricFloat(id: StandardMetric.soh.id, initialValue: 54.84, precision: 2, unit: Unit.percent),
@@ -18,7 +18,8 @@ class DummyVehicle extends Vehicle {
       MetricFloat(id: StandardMetric.hvBattTemperature.id, initialValue: 38.45, precision: 2, unit: Unit.celsius),
       MetricInt(id: StandardMetric.chargeStatus.id, initialValue: 0),
       MetricFloat(id: StandardMetric.steeringAngle.id, initialValue: -1, precision: 2),
-      MetricFloat(id: StandardMetric.tripDistance.id, initialValue: 42.92, precision: 2, unit: Unit.kilometers),
+      MetricInt(id: StandardMetric.tripDistance.id, initialValue: 28, unit: Unit.kilometers),
+      MetricInt(id: StandardMetric.tripEfficiency.id, initialValue: -5, unit: Unit.kilometers),
       MetricInt(id: StandardMetric.headlights.id, initialValue: 1),
       MetricInt(id: StandardMetric.fanSpeed.id, initialValue: 5),
       MetricInt(id: StandardMetric.parkBrake.id, initialValue: 0),

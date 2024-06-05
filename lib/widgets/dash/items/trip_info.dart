@@ -10,25 +10,25 @@ class TripInfoDashItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tripDistance = Metric.watch<MetricFloat>(context, StandardMetric.tripDistance.id);
+    final tripDistance = Metric.watch<MetricInt>(context, StandardMetric.tripDistance.id);
 
     if (tripDistance == null) {
       return IncompatibleDashItem(this);
     }
 
-    final range = Metric.watch<MetricInt>(context, StandardMetric.range.id);
-    final rangeLastCharge = Metric.watch<MetricInt>(context, StandardMetric.rangeLastCharge.id);
-    
-    int rangeVariation = 0;
+    final tripEfficiency = Metric.watch<MetricInt>(context, StandardMetric.tripEfficiency.id);
 
-    if (tripDistance.value != null && range?.value != null && rangeLastCharge?.value != null && rangeLastCharge!.value! > 0) {
-      final double idealRange = rangeLastCharge.value! - tripDistance.value!;
-      rangeVariation = (range!.value! - idealRange).round();
+    String efficiencyText = 'N/A';
+    Color? efficiencyTextColor;
+    Unit efficiencyUnit = Unit.none;
+
+    if (tripEfficiency != null && tripEfficiency.value != null) {
+      final val = tripEfficiency.value!;
+
+      efficiencyText = (val == 0) ? 'Perfect' : (val >= 0) ? '+$val' : '$val';
+      efficiencyTextColor = (val >= 0) ? Colors.green : Colors.red;
+      efficiencyUnit = (val != 0) ? Unit.kilometers : Unit.none;
     }
-
-    final String rangeVariationText = 
-      (rangeVariation == 0) ? 'Perfect' :
-      (rangeVariation >= 0) ? '+$rangeVariation' : '$rangeVariation';
 
     return DashItem(
       child: Column(
@@ -40,10 +40,10 @@ class TripInfoDashItem extends StatelessWidget {
             defaultValue: '0',
           ),
           PropertyLabel(
-            value: rangeVariationText,
+            value: efficiencyText,
             title: 'Efficiency',
-            valueColor: (rangeVariation >= 0) ? Colors.green : Colors.red,
-            unit: (rangeVariation != 0) ? Unit.kilometers : Unit.none,
+            valueColor: efficiencyTextColor,
+            unit: efficiencyUnit,
           ),
         ],
       ),

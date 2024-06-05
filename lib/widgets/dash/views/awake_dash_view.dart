@@ -1,7 +1,6 @@
 import 'package:candle_dash/widgets/dash/dash_column.dart';
 import 'package:candle_dash/widgets/dash/items/battery_meter.dart';
 import 'package:candle_dash/widgets/dash/items/battery_stats.dart';
-import 'package:candle_dash/widgets/dash/items/birdseye.dart';
 import 'package:candle_dash/widgets/dash/items/clock.dart';
 import 'package:candle_dash/widgets/dash/items/connection_status_indicator.dart';
 import 'package:candle_dash/widgets/dash/items/gear_indicator.dart';
