@@ -77,6 +77,12 @@ class HomePage extends StatelessWidget {
             trailing: const Icon(Icons.arrow_forward_ios),
             onTap: () => Navigator.pushNamed(context, '/app_settings'),
           ),
+          ListTile(
+            title: const Text('Terminal'),
+            leading: const Icon(Icons.terminal),
+            trailing: const Icon(Icons.arrow_forward_ios),
+            onTap: () => Navigator.pushNamed(context, '/terminal'),
+          ),
           // ListTile(
           //   title: const Text('Scanner Settings'),
           //   leading: const Icon(Icons.memory),

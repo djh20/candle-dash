@@ -12,10 +12,10 @@ class BluetoothUuids {
   static const String otaCommandChar = '00000001-$customSuffix';
   static const String otaDataChar = '00000002-$customSuffix';
 
-  static const String configService = '00000200-$customSuffix';
-  static const String configVehicleIdChar = '00000201-$customSuffix';
+  static const String consoleService = '00000100-$customSuffix';
+  static const String consoleCommandChar = '00000101-$customSuffix';
 
-  static const String vehicleCatalogService = '00000300-$customSuffix';
+  // static const String vehicleCatalogService = '00000300-$customSuffix';
 
   static const String metricsService = '00000400-$customSuffix';
   static const String metricsDescriptor = '00000402-$customSuffix';

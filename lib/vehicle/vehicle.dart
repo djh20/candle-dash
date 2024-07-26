@@ -42,19 +42,21 @@ class Vehicle with ChangeNotifier {
   Future<void> init(BluetoothDevice device) async {
     if (!device.isConnected) return;
 
+    return; // CURRENTLY DISABLED
+
     final metricsService = device.servicesList.firstWhere(
       (m) => m.uuid == Guid.fromString(BluetoothUuids.metricsService),
     );
 
-    final configService = device.servicesList.firstWhere(
-      (m) => m.uuid == Guid.fromString(BluetoothUuids.configService),
-    );
+    // final configService = device.servicesList.firstWhere(
+    //   (m) => m.uuid == Guid.fromString(BluetoothUuids.configService),
+    // );
 
-    final vehicleIdCharacteristic = configService.characteristics.firstWhere(
-      (c) => c.uuid == Guid.fromString(BluetoothUuids.configVehicleIdChar),
-    );
+    // final vehicleIdCharacteristic = configService.characteristics.firstWhere(
+    //   (c) => c.uuid == Guid.fromString(BluetoothUuids.configVehicleIdChar),
+    // );
 
-    id = intListToUint16(await vehicleIdCharacteristic.read());
+    // id = intListToUint16(await vehicleIdCharacteristic.read());
     debugPrint('Vehicle ID: $id');
     _setRepresentation();
 

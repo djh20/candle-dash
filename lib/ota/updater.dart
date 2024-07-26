@@ -107,7 +107,9 @@ abstract class Updater with ChangeNotifier {
 
     if (currentVersion != null && latestVersion != null) {
       debugPrint('Latest version for $_repoSlug is $latestVersion');
-      if (latestVersion! > currentVersion!) {
+
+      // Allow upgrades and downgrades.
+      if (latestVersion! != currentVersion!) {
         updateAvailability = UpdateAvailability.newVersionAvailable;
       } else {
         updateAvailability = UpdateAvailability.upToDate;

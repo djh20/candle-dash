@@ -4,6 +4,7 @@ import 'package:candle_dash/widgets/pages/app_settings_page.dart';
 import 'package:candle_dash/widgets/pages/bluetooth_page.dart';
 import 'package:candle_dash/widgets/pages/dash_page.dart';
 import 'package:candle_dash/widgets/pages/home_page.dart';
+import 'package:candle_dash/widgets/pages/terminal_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -46,6 +47,7 @@ class MyMaterialApp extends StatelessWidget {
         '/bluetooth': (context) => const BluetoothPage(),
         '/dash': (context) => const DashPage(),
         '/app_settings': (context) => const AppSettingsPage(),
+        '/terminal': (context) => const TerminalPage(),
         '/device_settings': (context) => const SizedBox(),
       },
     );

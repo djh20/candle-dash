@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'package:candle_dash/bluetooth/bluetooth_uuids.dart';
 import 'package:candle_dash/settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -182,6 +183,25 @@ class BluetoothManager with ChangeNotifier {
     await stopScan();
     await disconnect();
     _setStatusMessage('Bluetooth disabled');
+  }
+
+  Future<void> runCommand(String command) async {
+    // TODO: Move to seperate class.
+
+    if (currentDevice == null || !isConnected) return;
+
+    debugPrint('Running command: $command');
+    
+    final consoleService = currentDevice!.servicesList.firstWhere(
+      (s) => s.uuid == Guid.fromString(BluetoothUuids.consoleService),
+    );
+
+    final commandCharacteristic = consoleService.characteristics.firstWhere(
+      (c) => c.uuid == Guid.fromString(BluetoothUuids.consoleCommandChar),
+    );
+
+    final data = command.codeUnits + <int>[10, 0];
+    await commandCharacteristic.write(data);
   }
 
   Future<void> _onSettingsUpdate() async {
