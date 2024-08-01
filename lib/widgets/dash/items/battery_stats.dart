@@ -17,15 +17,15 @@ class BatteryStatsGizmo extends NewGizmo {
 class _BatteryStatsGizmoState extends NewGizmoState {
   @override
   Widget buildContent(BuildContext context) {
-    final power = Metric.watch<MetricFloat>(context, StandardMetric.hvBattPower.id);
-    final voltage = Metric.watch<MetricFloat>(context, StandardMetric.hvBattVoltage.id);
-    final current = Metric.watch<MetricFloat>(context, StandardMetric.hvBattCurrent.id);
-    final temperature = Metric.watch<MetricFloat>(context, StandardMetric.hvBattTemperature.id);
-    final capacity = Metric.watch<MetricFloat>(context, StandardMetric.hvBattCapacity.id);
-    final soh = Metric.watch<MetricFloat>(context, StandardMetric.soh.id);
+    final power = Metric.watch<FloatMetric>(context, 'nl.hvb_power');
+    final voltage = Metric.watch<FloatMetric>(context, 'nl.hvb_voltage');
+    final current = Metric.watch<FloatMetric>(context, 'nl.hvb_current');
+    final temperature = Metric.watch<FloatMetric>(context, 'nl.hvb_temp');
+    final capacity = Metric.watch<FloatMetric>(context, 'nl.hvb_capacity');
+    final soh = Metric.watch<FloatMetric>(context, 'nl.soh');
 
-    final slowCharges = Metric.watch<MetricInt>(context, StandardMetric.slowCharges.id);
-    final quickCharges = Metric.watch<MetricInt>(context, StandardMetric.quickCharges.id);
+    final slowCharges = Metric.watch<IntMetric>(context, 'nl.chg_slow_count');
+    final quickCharges = Metric.watch<IntMetric>(context, 'nl.chg_fast_count');
 
     if (power == null) return incompatible;
     
@@ -56,7 +56,7 @@ class _BatteryStatsGizmoState extends NewGizmoState {
         if (temperature != null) LimitsIndicator(
           title: const Text('Battery Temperature'),
           displayValue: MetricLabel(temperature),
-          value: temperature.value ?? 0,
+          value: temperature.getValue() ?? 0,
           min: 0,
           max: 45,
           minColor: Colors.blue,
@@ -75,7 +75,7 @@ class _BatteryStatsGizmoState extends NewGizmoState {
               MetricLabel(capacity),
             ],
           ),
-          value: soh.value ?? 0,
+          value: soh.getValue() ?? 0,
           min: 0,
           max: 100,
           minColor: Colors.red,

@@ -9,7 +9,7 @@ class DashSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vehicleAwake = Metric.watch<MetricInt>(context, StandardMetric.awake.id)?.value == 1;
+    final vehicleAwake = Metric.watch<IntMetric>(context, 'nl.ignition')?.getValue() == 1;
 
     return DashColumn(
       flex: 1,

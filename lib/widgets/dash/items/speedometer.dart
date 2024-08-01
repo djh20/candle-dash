@@ -13,17 +13,17 @@ class SpeedometerGizmo extends Gizmo {
 
   @override
   Widget buildContent(BuildContext context) {
-    final speed = Metric.watch<MetricFloat>(context, StandardMetric.speed.id);
-    final gear = Metric.watch<MetricInt>(context, StandardMetric.gear.id);
+    final speed = Metric.watch<FloatMetric>(context, 'nl.speed');
+    final gear = Metric.watch<IntMetric>(context, 'nl.gear');
 
     if (speed == null) return incompatible;
 
-    final bool parked = (gear?.value == null || gear?.value == VehicleGear.park.index);
+    final bool parked = (gear?.getValue() == null || gear?.getValue() == VehicleGear.park.index);
     
     return SizedBox(
       height: 135,
       child: CustomAnimatedSwitcher(
-        child: parked ? const _Sideprofile() : _Speedo(speed: speed.value ?? 0),
+        child: parked ? const _Sideprofile() : _Speedo(speed: speed.getValue() ?? 0),
       ),
     );
   }
@@ -75,8 +75,8 @@ class _Sideprofile extends StatelessWidget {
       return const CircularProgressIndicator();
     }
 
-    final chargeStatus = Metric.watch<MetricInt>(context, StandardMetric.chargeStatus.id);
-    final bool pluggedIn = (chargeStatus?.value != null && chargeStatus!.value! > 0);
+    final chargeStatus = Metric.watch<IntMetric>(context, 'nl.chg_status');
+    final bool pluggedIn = ((chargeStatus?.getValue() ?? 0) > 0);
 
     final String image = pluggedIn ? 'charging.png' : 'parked.png';
 
@@ -117,7 +117,7 @@ class _BatteryPack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double soc = Metric.watch<MetricFloat>(context, StandardMetric.soc.id)?.value ?? 0;
+    final double soc = Metric.watch<FloatMetric>(context, 'nl.soc')?.getValue() ?? 0;
 
     return SizedBox(
       width: double.infinity,

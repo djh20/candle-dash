@@ -19,7 +19,7 @@ enum VehicleGear {
 class Vehicle with ChangeNotifier {
   Vehicle();
 
-  int? id;
+  String? id;
   VehicleRepresentation? representation;
   List<Metric> metrics = [];
 
@@ -42,8 +42,6 @@ class Vehicle with ChangeNotifier {
   Future<void> init(BluetoothDevice device) async {
     if (!device.isConnected) return;
 
-    return; // CURRENTLY DISABLED
-
     final metricsService = device.servicesList.firstWhere(
       (m) => m.uuid == Guid.fromString(BluetoothUuids.metricsService),
     );
@@ -57,7 +55,7 @@ class Vehicle with ChangeNotifier {
     // );
 
     // id = intListToUint16(await vehicleIdCharacteristic.read());
-    debugPrint('Vehicle ID: $id');
+    // debugPrint('Vehicle ID: $id');
     _setRepresentation();
 
     for (final characteristic in metricsService.characteristics) {
@@ -71,9 +69,6 @@ class Vehicle with ChangeNotifier {
 
       while (descriptorData.isNotEmpty) {
         final metric = Metric.fromDescriptor(descriptorData);
-        if (metric.descriptor != null) {
-          descriptorData = descriptorData.sublist(metric.descriptor!.length);
-        }
         characteristicMetrics.add(metric);
         registerMetric(metric);
       }
@@ -101,9 +96,9 @@ class Vehicle with ChangeNotifier {
 
   void processCharacteristicData(List<int> data, List<Metric> characteristicMetrics) {
     for (final metric in characteristicMetrics) {
-      if (metric.descriptor != null) {
-        final metricData = data.sublist(metric.descriptor![2]);
-        metric.setValueFromRawData(metricData);
+      if (metric.dataIndex != null) {
+        final metricData = data.sublist(metric.dataIndex!);
+        metric.setStateFromRawData(metricData);
       }
     }
   }
@@ -113,7 +108,7 @@ class Vehicle with ChangeNotifier {
     notifyListeners();
     newMetric.addListener(() => notifyListeners()); 
 
-    debugPrint('Registered metric: ${newMetric.id}');
+    debugPrint('Registered metric: ${newMetric.id} (${newMetric.type})');
   }
 
   void registerMetrics(List<Metric> newMetrics) => newMetrics.forEach(registerMetric);
@@ -141,7 +136,7 @@ class VehicleRepresentation {
     this.chargingRenderPackWidthFactor,
   });
 
-  final int? vehicleId;
+  final String? vehicleId;
   final String rendersDirectory;
   final String brand;
   

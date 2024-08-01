@@ -16,9 +16,9 @@ class BatteryMeterGizmo extends NewGizmo {
 class _BatteryMeterGizmoState extends NewGizmoState {
   @override
   Widget buildContent(BuildContext context) {
-    final soc = Metric.watch<MetricFloat>(context, StandardMetric.soc.id);
-    final range = Metric.watch<MetricInt>(context, StandardMetric.range.id);
-    final charging = Metric.watch<MetricInt>(context, StandardMetric.chargeStatus.id)?.value == 1;
+    final soc = Metric.watch<FloatMetric>(context, 'nl.soc');
+    final range = Metric.watch<IntMetric>(context, 'nl.range');
+    final charging = Metric.watch<IntMetric>(context, 'nl.chg_status')?.getValue() == 1;
 
     if (soc == null) return incompatible;
     
@@ -42,7 +42,7 @@ class _BatteryMeterGizmoState extends NewGizmoState {
           ],
         ),
         LinearProgressIndicator(
-          value: (soc.value ?? 0) / 100,
+          value: (soc.getValue() ?? 0) / 100,
           minHeight: 7,
           color: chargeColor,
           backgroundColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.2),

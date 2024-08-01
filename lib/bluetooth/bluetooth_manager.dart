@@ -144,6 +144,9 @@ class BluetoothManager with ChangeNotifier {
     await device.connect(timeout: const Duration(seconds: 5));
     debugPrint('Connected to ${device.advName} (${device.remoteId.str})');
 
+    _setStatusMessage('Clearing cache');
+    await device.clearGattCache();
+
     _setStatusMessage('Requesting high priority');
     await device.requestConnectionPriority(
       connectionPriorityRequest: ConnectionPriority.high,
@@ -159,6 +162,8 @@ class BluetoothManager with ChangeNotifier {
     for (final service in services) {
       debugPrint('- ${service.uuid.str128}');
     }
+
+    debugPrint('MTU: ${device.mtuNow}');
 
     statusMessage = 'MAC: ${device.remoteId.str}';
     isConnected = true;
@@ -271,7 +276,7 @@ class BluetoothManager with ChangeNotifier {
 
   void _onConnectionStateUpdate(BluetoothConnectionState state) {
     if (state == BluetoothConnectionState.disconnected && isConnected) {
-      _setStatusMessage('Lost connection unexpectedly');
+      _setStatusMessage('Lost connection');
       _resetConnection();
     }
   }

@@ -34,7 +34,7 @@ class _TurnSignalsDashItemState extends State<TurnSignalsDashItem> with TickerPr
   
   @override
   Widget build(BuildContext context) {
-    final turnSignal = Metric.watch<MetricInt>(context, StandardMetric.turnSignal.id)?.value;
+    final turnSignal = Metric.watch<IntMetric>(context, 'nl.turn_signal')?.getValue();
 
     final bool leftTurnSignal = (turnSignal == 1 || turnSignal == 3);
     final bool rightTurnSignal = (turnSignal == 2 || turnSignal == 3);

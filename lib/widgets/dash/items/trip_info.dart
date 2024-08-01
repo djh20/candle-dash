@@ -10,20 +10,20 @@ class TripInfoDashItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tripDistance = Metric.watch<MetricInt>(context, StandardMetric.tripDistance.id);
+    final tripDistance = Metric.watch<IntMetric>(context, 'nl.trip_distance');
 
     if (tripDistance == null) {
       return IncompatibleDashItem(this);
     }
 
-    final tripEfficiency = Metric.watch<MetricInt>(context, StandardMetric.tripEfficiency.id);
+    final tripEfficiency = Metric.watch<IntMetric>(context, 'nl.trip_efficiency');
 
     String efficiencyText = 'N/A';
     Color? efficiencyTextColor;
     Unit efficiencyUnit = Unit.none;
 
-    if (tripEfficiency != null && tripEfficiency.value != null) {
-      final val = tripEfficiency.value!;
+    if (tripEfficiency != null && tripEfficiency.getValue() != null) {
+      final val = tripEfficiency.getValue()!;
 
       efficiencyText = (val == 0) ? 'Perfect' : (val >= 0) ? '+$val' : '$val';
       efficiencyTextColor = (val >= 0) ? Colors.green : Colors.red;

@@ -17,8 +17,8 @@ class BluetoothUuids {
 
   // static const String vehicleCatalogService = '00000300-$customSuffix';
 
-  static const String metricsService = '00000400-$customSuffix';
-  static const String metricsDescriptor = '00000402-$customSuffix';
+  static const String metricsService = '00000300-$customSuffix';
+  static const String metricsDescriptor = '00000302-$customSuffix';
 
   static bool customCheck(List<int> uuid, int shortId) {
     return (uuid[2] << 8 | uuid[3]) == shortId;

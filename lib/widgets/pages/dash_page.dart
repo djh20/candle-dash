@@ -79,7 +79,7 @@ class _DashPageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final vehicleAwake = Metric.watch<MetricInt>(context, StandardMetric.awake.id)?.value == 1;
+    final vehicleAwake = Metric.watch<IntMetric>(context, 'nl.ignition')?.getValue() == 1;
 
     return PopScope(
       onPopInvoked: (didPop) => didPop ? ScaffoldMessenger.of(context).clearSnackBars() : null,

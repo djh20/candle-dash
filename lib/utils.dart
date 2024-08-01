@@ -22,6 +22,15 @@ num calculateMedian(List<num> values) {
   return median;
 }
 
+String intListToString(List<int> list) {
+  // Only process up to null character.
+  if (list.contains(0)) {
+    return String.fromCharCodes(list, 0, list.indexOf(0));
+  }
+
+  return String.fromCharCodes(list);
+}
+
 int intListToInt32(List<int> list, {Endian endian = Endian.big}) {
   final intList = Int8List.fromList(list);
   return intList.buffer.asByteData().getInt32(0, endian);

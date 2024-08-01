@@ -20,8 +20,8 @@ class _BirdseyeGizmoState extends NewGizmoState {
     final vehicleRepresentation = context.select((Vehicle? v) => v?.representation);
     if (vehicleRepresentation == null) return spinner;
     
-    final speed = Metric.watch<MetricFloat>(context, StandardMetric.speed.id)?.value ?? 0;
-    final gear = Metric.watch<MetricInt>(context, StandardMetric.gear.id)?.value ?? 0;
+    final speed = Metric.watch<FloatMetric>(context, 'nl.speed')?.getValue() ?? 0;
+    final gear = Metric.watch<IntMetric>(context, 'nl.gear')?.getValue() ?? 0;
 
     if (isOverlayVisible && (speed >= 10 || gear == 0)) {
       hideOverlay();
@@ -61,7 +61,7 @@ class _Trajectory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final steeringAngle = Metric.watch<MetricFloat>(context, StandardMetric.steeringAngle.id)?.value ?? 0;
+    final steeringAngle = Metric.watch<FloatMetric>(context, 'nl.steering_angle')?.getValue() ?? 0;
 
     return Transform.flip(
       flipY: (travelDirection == VerticalDirection.down),

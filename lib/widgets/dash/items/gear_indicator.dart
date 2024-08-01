@@ -10,7 +10,7 @@ class GearIndicatorGizmo extends Gizmo {
 
   @override
   Widget buildContent(BuildContext context) {
-    final gear = Metric.watch<MetricInt>(context, StandardMetric.gear.id);
+    final gear = Metric.watch<IntMetric>(context, 'nl.gear');
 
     if (gear == null) return incompatible;
 
@@ -20,7 +20,7 @@ class GearIndicatorGizmo extends Gizmo {
         (g) => Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: AnimatedOpacity(
-            opacity: (gear.value == g.index) ? 1 : 0.3,
+            opacity: (gear.getValue() == g.index) ? 1 : 0.3,
             duration: const Duration(milliseconds: 100),
             child: Text(
               g.symbol,

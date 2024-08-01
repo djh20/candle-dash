@@ -18,25 +18,25 @@ class PowerBarGizmo extends Gizmo {
     final Color outColor = Theme.of(context).colorScheme.onSurface;
     const Color inColor = chargeColor;
 
-    final power = Metric.watch<MetricFloat>(context, StandardMetric.hvBattPower.id);
-    final gear = Metric.watch<MetricInt>(context, StandardMetric.gear.id);
+    final power = Metric.watch<FloatMetric>(context, 'nl.hvb_power');
+    final gear = Metric.watch<IntMetric>(context, 'nl.gear');
 
     if (power == null) return incompatible;
     
     return AnimatedOpacity(
-      opacity: (gear == null || (gear.value ?? 0) > 0) ? 1 : 0,
+      opacity: (gear == null || (gear.getValue() ?? 0) > 0) ? 1 : 0,
       duration: const Duration(milliseconds: 200),
       child: Row(
         children: [
           PowerBarSegment(
             alignment: Alignment.centerRight,
-            widthFactor: (((-(power.value ?? 0) - deadZone) / inMaxPower)).clamp(0, 1),
+            widthFactor: (((-(power.getValue() ?? 0) - deadZone) / inMaxPower)).clamp(0, 1),
             color: inColor,
           ),
           const SizedBox(width: 4),
           PowerBarSegment(
             alignment: Alignment.centerLeft,
-            widthFactor: ((((power.value ?? 0) - deadZone) / outMaxPower)).clamp(0, 1),
+            widthFactor: ((((power.getValue() ?? 0) - deadZone) / outMaxPower)).clamp(0, 1),
             color: outColor,
           ),
         ],
