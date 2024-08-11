@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 // TODO: Make these configurable.
 const double inMaxPower = 30;
 const double outMaxPower = 80;
-const double deadZone = 1;
 
 class PowerBarGizmo extends Gizmo {
   const PowerBarGizmo({super.key}) : super(
@@ -18,7 +17,7 @@ class PowerBarGizmo extends Gizmo {
     final Color outColor = Theme.of(context).colorScheme.onSurface;
     const Color inColor = chargeColor;
 
-    final power = Metric.watch<FloatMetric>(context, 'nl.hvb_power');
+    final power = Metric.watch<FloatMetric>(context, 'nl.motor_power');
     final gear = Metric.watch<IntMetric>(context, 'nl.gear');
 
     if (power == null) return incompatible;
@@ -30,13 +29,13 @@ class PowerBarGizmo extends Gizmo {
         children: [
           PowerBarSegment(
             alignment: Alignment.centerRight,
-            widthFactor: (((-(power.getValue() ?? 0) - deadZone) / inMaxPower)).clamp(0, 1),
+            widthFactor: ((-(power.getValue() ?? 0)/ inMaxPower)).clamp(0, 1),
             color: inColor,
           ),
           const SizedBox(width: 4),
           PowerBarSegment(
             alignment: Alignment.centerLeft,
-            widthFactor: ((((power.getValue() ?? 0) - deadZone) / outMaxPower)).clamp(0, 1),
+            widthFactor: (((power.getValue() ?? 0) / outMaxPower)).clamp(0, 1),
             color: outColor,
           ),
         ],

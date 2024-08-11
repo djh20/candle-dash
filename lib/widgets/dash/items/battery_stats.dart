@@ -1,3 +1,4 @@
+import 'package:candle_dash/theme.dart';
 import 'package:candle_dash/vehicle/metric.dart';
 import 'package:candle_dash/widgets/dash/horizontal_line.dart';
 import 'package:candle_dash/widgets/dash/limits_indicator.dart';
@@ -17,9 +18,12 @@ class BatteryStatsGizmo extends NewGizmo {
 class _BatteryStatsGizmoState extends NewGizmoState {
   @override
   Widget buildContent(BuildContext context) {
-    final power = Metric.watch<FloatMetric>(context, 'nl.hvb_power');
+    final netPower = Metric.watch<FloatMetric>(context, 'nl.net_power');
+    final chargePower = Metric.watch<FloatMetric>(context, 'nl.chg_power');
+    final chargeMode = Metric.watch<IntMetric>(context, 'nl.chg_mode');
+    final bool charging = (chargeMode?.getValue() ?? 0) > 0;
+
     final voltage = Metric.watch<FloatMetric>(context, 'nl.hvb_voltage');
-    final current = Metric.watch<FloatMetric>(context, 'nl.hvb_current');
     final temperature = Metric.watch<FloatMetric>(context, 'nl.hvb_temp');
     final capacity = Metric.watch<FloatMetric>(context, 'nl.hvb_capacity');
     final soh = Metric.watch<FloatMetric>(context, 'nl.soh');
@@ -27,28 +31,19 @@ class _BatteryStatsGizmoState extends NewGizmoState {
     final slowCharges = Metric.watch<IntMetric>(context, 'nl.chg_slow_count');
     final quickCharges = Metric.watch<IntMetric>(context, 'nl.chg_fast_count');
 
-    if (power == null) return incompatible;
+    if (netPower == null) return incompatible;
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         MetricLabel(
-          power,
+          (charging && chargePower != null) ? chargePower : netPower,
           fontSize: 40,
         ),
         
-        if (voltage != null && current != null) Row(
-          children: [
-            MetricLabel(
-              voltage,
-              fontSize: 22,
-            ),
-            const HorizontalLine(width: 20),
-            MetricLabel(
-              current,
-              fontSize: 22,
-            ),
-          ],
+        if (voltage != null) MetricLabel(
+          voltage,
+          fontSize: 22,
         ),
 
         const SizedBox(height: 10),
