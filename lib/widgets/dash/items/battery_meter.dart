@@ -18,7 +18,9 @@ class _BatteryMeterGizmoState extends NewGizmoState {
   Widget buildContent(BuildContext context) {
     final soc = Metric.watch<FloatMetric>(context, 'nl.soc');
     final range = Metric.watch<IntMetric>(context, 'nl.range');
-    final charging = Metric.watch<IntMetric>(context, 'nl.chg_status')?.getValue() == 1;
+    final chargeMode = Metric.watch<IntMetric>(context, 'nl.chg_mode');
+
+    bool charging = (chargeMode != null && (chargeMode.getValue() ?? 0) > 0);
 
     if (soc == null) return incompatible;
     
