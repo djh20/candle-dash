@@ -9,7 +9,7 @@ class StatusIconsDashItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final parkBrake = Metric.watch<IntMetric>(context, 'nl.park_brake');
-    final ccFanSpeed = Metric.watch<IntMetric>(context, 'nl.cc_fan_speed');
+    final ccStatus = Metric.watch<IntMetric>(context, 'nl.cc_status');
     final headlights = Metric.watch<IntMetric>(context, 'nl.headlights');
 
     return DashItem(
@@ -30,9 +30,9 @@ class StatusIconsDashItem extends StatelessWidget {
               color: Colors.green,
               active: (headlights.getValue() != null && headlights.getValue()! > 0),
             ),
-            if (ccFanSpeed != null) StatusIcon(
+            if (ccStatus != null) StatusIcon(
               icon: Icons.air_rounded,
-              active: (ccFanSpeed.getValue() != null && ccFanSpeed.getValue()! > 0),
+              active: (ccStatus.getValue() != null && ccStatus.getValue()! > 0),
             ),
           ],
         ),
