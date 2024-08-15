@@ -1,6 +1,5 @@
 import 'package:candle_dash/vehicle/metric.dart';
 import 'package:candle_dash/widgets/dash/dash_item.dart';
-import 'package:candle_dash/widgets/dash/items/incompatible.dart';
 import 'package:candle_dash/widgets/dash/metric_label.dart';
 import 'package:candle_dash/widgets/dash/property_label.dart';
 import 'package:flutter/material.dart';
@@ -12,9 +11,7 @@ class TripInfoDashItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final tripDistance = Metric.watch<IntMetric>(context, 'nl.trip_distance');
 
-    if (tripDistance == null) {
-      return IncompatibleDashItem(this);
-    }
+    if (tripDistance == null) return DashItem.incompatible;
 
     final tripEfficiency = Metric.watch<IntMetric>(context, 'nl.trip_efficiency');
 

@@ -1,44 +1,44 @@
 import 'package:candle_dash/theme.dart';
 import 'package:candle_dash/vehicle/metric.dart';
-import 'package:candle_dash/widgets/dash/gizmo.dart';
+import 'package:candle_dash/widgets/dash/dash_item.dart';
 import 'package:flutter/material.dart';
 
 // TODO: Make these configurable.
 const double inMaxPower = 30;
 const double outMaxPower = 80;
 
-class PowerBarGizmo extends Gizmo {
-  const PowerBarGizmo({super.key}) : super(
-    name: 'Power Bar',
-  );
+class PowerBarDashItem extends StatelessWidget {
+  const PowerBarDashItem({super.key});
 
   @override
-  Widget buildContent(BuildContext context) {
+  Widget build(BuildContext context) {
     final Color outColor = Theme.of(context).colorScheme.onSurface;
     const Color inColor = chargeColor;
 
     final power = Metric.watch<FloatMetric>(context, 'nl.motor_power');
     final gear = Metric.watch<IntMetric>(context, 'nl.gear');
 
-    if (power == null) return incompatible;
+    if (power == null) return DashItem.incompatible;
     
-    return AnimatedOpacity(
-      opacity: (gear == null || (gear.getValue() ?? 0) > 0) ? 1 : 0,
-      duration: const Duration(milliseconds: 200),
-      child: Row(
-        children: [
-          PowerBarSegment(
-            alignment: Alignment.centerRight,
-            widthFactor: ((-(power.getValue() ?? 0)/ inMaxPower)).clamp(0, 1),
-            color: inColor,
-          ),
-          const SizedBox(width: 4),
-          PowerBarSegment(
-            alignment: Alignment.centerLeft,
-            widthFactor: (((power.getValue() ?? 0) / outMaxPower)).clamp(0, 1),
-            color: outColor,
-          ),
-        ],
+    return DashItem(
+      child: AnimatedOpacity(
+        opacity: (gear == null || (gear.getValue() ?? 0) > 0) ? 1 : 0,
+        duration: const Duration(milliseconds: 200),
+        child: Row(
+          children: [
+            PowerBarSegment(
+              alignment: Alignment.centerRight,
+              widthFactor: ((-(power.getValue() ?? 0)/ inMaxPower)).clamp(0, 1),
+              color: inColor,
+            ),
+            const SizedBox(width: 4),
+            PowerBarSegment(
+              alignment: Alignment.centerLeft,
+              widthFactor: (((power.getValue() ?? 0) / outMaxPower)).clamp(0, 1),
+              color: outColor,
+            ),
+          ],
+        ),
       ),
     );
   }

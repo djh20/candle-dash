@@ -1,5 +1,4 @@
 import 'package:candle_dash/vehicle/vehicle.dart';
-import 'package:candle_dash/widgets/dash/dash_item.dart';
 import 'package:candle_dash/widgets/helpers/custom_animated_switcher.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -12,7 +11,7 @@ class BrandLogo extends StatelessWidget {
     final vehicleRepresentation = context.select((Vehicle? v) => v?.representation);
     final isDarkTheme = Theme.of(context).colorScheme.brightness == Brightness.dark;
 
-    return DashItem(
+    return SizedBox(
       height: 250,
       child: CustomAnimatedSwitcher(
         child: (vehicleRepresentation != null) ? 

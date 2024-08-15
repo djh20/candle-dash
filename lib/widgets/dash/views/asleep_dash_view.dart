@@ -40,7 +40,7 @@ class AsleepDashView extends StatelessWidget {
                 ),
               ),
             
-            const ConnectionStatusIndicatorGizmo(),
+            const ConnectionStatusDashItem(),
           ],
         ),
       ],

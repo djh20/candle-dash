@@ -158,7 +158,10 @@ class IntMetric extends Metric {
     super.dataIndex,
     super.elementCount,
     super.unit,
-  });
+    List<int>? initialState,
+  }) {
+    setState(initialState);
+  }
   
   List<int>? state;
 
@@ -199,7 +202,10 @@ class FloatMetric extends Metric {
     super.elementCount,
     super.unit,
     required this.precision,
-  });
+    List<double>? initialState,
+  }) {
+    setState(initialState);
+  }
 
   List<double>? state;
   int precision;
@@ -241,6 +247,7 @@ class StringMetric extends Metric {
     required super.type,
     super.unit,
     required this.elementSize,
+    List<String>? initialState,
   });
 
   List<String>? state;

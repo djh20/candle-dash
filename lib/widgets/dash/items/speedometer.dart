@@ -1,29 +1,29 @@
 import 'package:candle_dash/theme.dart';
 import 'package:candle_dash/vehicle/metric.dart';
 import 'package:candle_dash/vehicle/vehicle.dart';
-import 'package:candle_dash/widgets/dash/gizmo.dart';
+import 'package:candle_dash/widgets/dash/dash_item.dart';
 import 'package:candle_dash/widgets/helpers/custom_animated_switcher.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class SpeedometerGizmo extends Gizmo {
-  const SpeedometerGizmo({super.key}) : super(
-    name: 'Speedometer',
-  );
+class SpeedometerDashItem extends StatelessWidget {
+  const SpeedometerDashItem({super.key});
 
   @override
-  Widget buildContent(BuildContext context) {
+  Widget build(BuildContext context) {
     final speed = Metric.watch<FloatMetric>(context, 'nl.speed');
     final gear = Metric.watch<IntMetric>(context, 'nl.gear');
 
-    if (speed == null) return incompatible;
+    if (speed == null) return DashItem.incompatible;
 
     final bool parked = (gear?.getValue() == null || gear?.getValue() == VehicleGear.park.index);
     
-    return SizedBox(
-      height: 135,
-      child: CustomAnimatedSwitcher(
-        child: parked ? const _Sideprofile() : _Speedo(speed: speed.getValue() ?? 0),
+    return DashItem(
+      child: SizedBox(
+        height: 135,
+        child: CustomAnimatedSwitcher(
+          child: parked ? const _Sideprofile() : _Speedo(speed: speed.getValue() ?? 0),
+        ),
       ),
     );
   }

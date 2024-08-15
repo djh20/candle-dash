@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 
 class DashItem extends StatelessWidget {
+  static Widget get incompatible => const SizedBox.shrink();
+  
   const DashItem({
-    super.key,
+    super.key, 
     this.child,
-    this.height,
+    this.padding = const EdgeInsets.only(top: 8, left: 10, right: 10),
   });
 
   final Widget? child;
-  final double? height;
+  final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: height,
-      child: Padding(
-        padding: const EdgeInsets.only(top: 8, left: 10, right: 10),
-        child: child,
-      ),
+    return Padding(
+      padding: padding,
+      child: child,
     );
   }
 }

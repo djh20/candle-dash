@@ -14,7 +14,7 @@ class DashSidebar extends StatelessWidget {
     return DashColumn(
       flex: 1,
       items: [
-        const ConnectionStatusIndicatorGizmo(),
+        const ConnectionStatusDashItem(),
         if (vehicleAwake) ...[
           Divider(
             indent: 10,
