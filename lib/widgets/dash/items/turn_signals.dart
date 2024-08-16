@@ -84,10 +84,23 @@ class TurnSignalIcon extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       child: SlideTransition(
         position: animation,
-        child: Icon(
-          icon,
-          color: Colors.green,
-          size: 32,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Container(
+              width: 20,
+              height: 20,
+              decoration: const ShapeDecoration(
+                shape: CircleBorder(),
+                color: Colors.white,
+              ),
+            ),
+            Icon(
+              icon,
+              color: Colors.green,
+              size: 32,
+            ),
+          ],
         ),
       ),
     );
