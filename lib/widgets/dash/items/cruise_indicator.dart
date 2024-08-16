@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 
 class CruiseIndicatorDashItem extends StatelessWidget {
   const CruiseIndicatorDashItem({super.key});
+  
+  static const _color = Color.fromRGBO(7, 152, 242, 1);
 
   @override
   Widget build(BuildContext context) {
@@ -13,33 +15,28 @@ class CruiseIndicatorDashItem extends StatelessWidget {
     return DashItem(
       child: Align(
         alignment: Alignment.center,
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Color.fromRGBO(7, 152, 242, 1),
-            borderRadius: BorderRadius.all(Radius.circular(5)),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.speed,
-                  color: Colors.white,
-                ),
-                const SizedBox(width: 5),
-                Text(
-                  '${cruiseSpeed.getValue() ?? '--'}',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ]
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.speed,
+              size: 24,
+              color: _color,
             ),
-          ),
+            const SizedBox(width: 5),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                '${cruiseSpeed.getValue() ?? '--'}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w900,
+                  color: _color,
+                  fontSize: 100,
+                  height: 1,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
